@@ -4,253 +4,205 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import Sidebar from '@/components/layout/Sidebar'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Save } from 'lucide-react'
 import Link from 'next/link'
-import { Area, Tag } from '@/types'
+import { Area } from '@/types'
+
+const inputStyle = {
+  width: '100%',
+  backgroundColor: '#0d1117',
+  border: '1px solid #30363d',
+  borderRadius: '8px',
+  padding: '10px 14px',
+  color: 'white',
+  fontSize: '14px',
+  outline: 'none',
+  boxSizing: 'border-box' as const,
+}
+
+const labelStyle = {
+  color: '#9ca3af',
+  fontSize: '13px',
+  marginBottom: '6px',
+  display: 'block' as const,
+}
 
 export default function NewProjectPage() {
   const router = useRouter()
   const [areas, setAreas] = useState<Area[]>([])
-  const [tags, setTags] = useState<Tag[]>([])
-  const [loading, setLoading] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [form, setForm] = useState({
     nombre: '',
     descripcion: '',
     area_id: '',
     estado: 'planificado',
     prioridad: 'media',
+    es_transversal: false,
     fecha_inicio: '',
     fecha_fin_estimada: '',
-    es_transversal: false,
-    selectedTags: [] as string[],
   })
 
   useEffect(() => {
-    Promise.all([
-      supabase.from('areas').select('*').order('nombre'),
-      supabase.from('tags').select('*').order('nombre'),
-    ]).then(([{ data: a }, { data: t }]) => {
-      setAreas(a || [])
-      setTags(t || [])
-    })
+    supabase.from('areas').select('*').order('nombre').then(({ data }) => setAreas(data || []))
   }, [])
+
+  const set = (k: string, v: any) => setForm(p => ({ ...p, [k]: v }))
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
+    if (!form.nombre.trim()) return
+    setSaving(true)
+    setError(null)
     try {
-      const { data: project, error } = await supabase
-        .from('projects')
-        .insert({
-          nombre: form.nombre,
-          descripcion: form.descripcion || null,
-          area_id: form.area_id || null,
-          estado: form.estado,
-          prioridad: form.prioridad,
-          fecha_inicio: form.fecha_inicio || null,
-          fecha_fin_estimada: form.fecha_fin_estimada || null,
-          es_transversal: form.es_transversal,
-        })
-        .select()
-        .single()
-
-      if (error) throw error
-
-      // Agregar tags
-      if (form.selectedTags.length > 0 && project) {
-        await supabase.from('project_tags').insert(
-          form.selectedTags.map(tag_id => ({ project_id: project.id, tag_id }))
-        )
+      const payload: any = {
+        nombre: form.nombre.trim(),
+        descripcion: form.descripcion.trim() || null,
+        area_id: form.area_id || null,
+        estado: form.estado,
+        prioridad: form.prioridad,
+        es_transversal: form.es_transversal,
+        fecha_inicio: form.fecha_inicio || null,
+        fecha_fin_estimada: form.fecha_fin_estimada || null,
       }
-
-      router.push(`/projects/${project?.id}`)
-    } catch (err) {
-      console.error(err)
-      alert('Error al crear el proyecto')
-    } finally {
-      setLoading(false)
+      const { data, error: err } = await supabase.from('projects').insert([payload]).select().single()
+      if (err) throw err
+      router.push(`/projects/${data.id}`)
+    } catch (err: any) {
+      setError(err.message || 'Error al crear el proyecto')
+      setSaving(false)
     }
   }
 
-  const toggleTag = (tagId: string) => {
-    setForm(prev => ({
-      ...prev,
-      selectedTags: prev.selectedTags.includes(tagId)
-        ? prev.selectedTags.filter(t => t !== tagId)
-        : [...prev.selectedTags, tagId],
-    }))
-  }
-
-  const inputClass = "w-full bg-[#0f1117] border border-[#2d3748] text-white placeholder-gray-500 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500"
-  const labelClass = "block text-sm font-medium text-gray-300 mb-1.5"
-
   return (
-    <div className="flex min-h-screen bg-[#0f1117]">
+    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#0d1117', fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif' }}>
       <Sidebar />
-      <main className="flex-1 p-6 overflow-auto">
-        <div className="max-w-2xl mx-auto">
-          {/* Header */}
-          <div className="flex items-center gap-3 mb-6">
-            <Link href="/projects" className="text-gray-400 hover:text-white transition-colors">
-              <ArrowLeft className="w-5 h-5" />
-            </Link>
-            <div>
-              <h1 className="text-xl font-bold text-white">Nuevo proyecto</h1>
-              <p className="text-gray-400 text-sm">Completá los datos del proyecto</p>
-            </div>
+      <main style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
+        <div style={{ maxWidth: '640px', margin: '0 auto' }}>
+          <Link href="/projects" style={{ color: '#6b7280', fontSize: '13px', textDecoration: 'none', display: 'inline-block', marginBottom: '20px' }}>
+            ← Proyectos
+          </Link>
+
+          <div style={{ marginBottom: '28px' }}>
+            <h1 style={{ color: 'white', fontSize: '22px', fontWeight: '700', margin: '0 0 4px' }}>Nuevo proyecto</h1>
+            <p style={{ color: '#6b7280', fontSize: '14px', margin: 0 }}>Completá los datos del proyecto</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="bg-[#1a1f2e] border border-[#2d3748] rounded-xl p-5 space-y-4">
-              <h2 className="font-semibold text-white mb-3">Información general</h2>
+          {error && (
+            <div style={{ backgroundColor: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: '#f87171', fontSize: '13px', borderRadius: '8px', padding: '12px 16px', marginBottom: '20px' }}>
+              {error}
+            </div>
+          )}
 
-              <div>
-                <label className={labelClass}>Nombre *</label>
-                <input
-                  required
-                  type="text"
-                  placeholder="Nombre del proyecto"
-                  value={form.nombre}
-                  onChange={e => setForm(p => ({ ...p, nombre: e.target.value }))}
-                  className={inputClass}
-                />
-              </div>
+          <form onSubmit={handleSubmit}>
+            <div style={{ backgroundColor: '#161b22', border: '1px solid #21262d', borderRadius: '12px', padding: '24px', marginBottom: '16px' }}>
+              <h2 style={{ color: 'white', fontSize: '15px', fontWeight: '600', margin: '0 0 20px' }}>Información general</h2>
 
-              <div>
-                <label className={labelClass}>Descripción</label>
-                <textarea
-                  rows={3}
-                  placeholder="Descripción del proyecto..."
-                  value={form.descripcion}
-                  onChange={e => setForm(p => ({ ...p, descripcion: e.target.value }))}
-                  className={inputClass + ' resize-none'}
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <div>
-                  <label className={labelClass}>Área</label>
-                  <select
-                    value={form.area_id}
-                    onChange={e => setForm(p => ({ ...p, area_id: e.target.value }))}
-                    className={inputClass}
-                  >
+                  <label style={labelStyle}>Nombre <span style={{ color: '#f87171' }}>*</span></label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Nombre del proyecto"
+                    value={form.nombre}
+                    onChange={e => set('nombre', e.target.value)}
+                    style={inputStyle}
+                  />
+                </div>
+
+                <div>
+                  <label style={labelStyle}>Descripción</label>
+                  <textarea
+                    placeholder="Descripción del proyecto..."
+                    value={form.descripcion}
+                    onChange={e => set('descripcion', e.target.value)}
+                    rows={3}
+                    style={{ ...inputStyle, resize: 'vertical', lineHeight: '1.5' }}
+                  />
+                </div>
+
+                <div>
+                  <label style={labelStyle}>Área</label>
+                  <select value={form.area_id} onChange={e => set('area_id', e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
                     <option value="">Sin área</option>
-                    {areas.map(a => (
-                      <option key={a.id} value={a.id}>{a.nombre}</option>
-                    ))}
+                    {areas.map(a => <option key={a.id} value={a.id}>{a.nombre}</option>)}
                   </select>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div>
+                    <label style={labelStyle}>Estado</label>
+                    <select value={form.estado} onChange={e => set('estado', e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
+                      <option value="planificado">Planificado</option>
+                      <option value="en_curso">En curso</option>
+                      <option value="pausado">Pausado</option>
+                      <option value="completado">Completado</option>
+                      <option value="cancelado">Cancelado</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Prioridad</label>
+                    <select value={form.prioridad} onChange={e => set('prioridad', e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
+                      <option value="baja">Baja</option>
+                      <option value="media">Media</option>
+                      <option value="alta">Alta</option>
+                      <option value="critica">Crítica</option>
+                    </select>
+                  </div>
                 </div>
 
                 <div>
-                  <label className={labelClass}>Estado</label>
-                  <select
-                    value={form.estado}
-                    onChange={e => setForm(p => ({ ...p, estado: e.target.value }))}
-                    className={inputClass}
-                  >
-                    <option value="planificado">Planificado</option>
-                    <option value="en_curso">En curso</option>
-                    <option value="pausado">Pausado</option>
-                    <option value="completado">Completado</option>
-                    <option value="cancelado">Cancelado</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className={labelClass}>Prioridad</label>
-                  <select
-                    value={form.prioridad}
-                    onChange={e => setForm(p => ({ ...p, prioridad: e.target.value }))}
-                    className={inputClass}
-                  >
-                    <option value="baja">Baja</option>
-                    <option value="media">Media</option>
-                    <option value="alta">Alta</option>
-                    <option value="critica">Crítica</option>
-                  </select>
-                </div>
-
-                <div className="flex items-end">
-                  <label className="flex items-center gap-2 cursor-pointer pb-2">
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
                     <input
                       type="checkbox"
                       checked={form.es_transversal}
-                      onChange={e => setForm(p => ({ ...p, es_transversal: e.target.checked }))}
-                      className="w-4 h-4 rounded border-gray-600 bg-[#0f1117] text-blue-500"
+                      onChange={e => set('es_transversal', e.target.checked)}
+                      style={{ width: '16px', height: '16px', accentColor: '#3b82f6', cursor: 'pointer' }}
                     />
-                    <span className="text-sm text-gray-300">Proyecto transversal</span>
+                    <span style={{ color: '#9ca3af', fontSize: '13px' }}>Proyecto transversal (involucra múltiples áreas)</span>
                   </label>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className={labelClass}>Fecha de inicio</label>
-                  <input
-                    type="date"
-                    value={form.fecha_inicio}
-                    onChange={e => setForm(p => ({ ...p, fecha_inicio: e.target.value }))}
-                    className={inputClass}
-                  />
-                </div>
-                <div>
-                  <label className={labelClass}>Fecha estimada de fin</label>
-                  <input
-                    type="date"
-                    value={form.fecha_fin_estimada}
-                    onChange={e => setForm(p => ({ ...p, fecha_fin_estimada: e.target.value }))}
-                    className={inputClass}
-                  />
                 </div>
               </div>
             </div>
 
-            {/* Tags */}
-            {tags.length > 0 && (
-              <div className="bg-[#1a1f2e] border border-[#2d3748] rounded-xl p-5">
-                <h2 className="font-semibold text-white mb-3">Etiquetas</h2>
-                <div className="flex flex-wrap gap-2">
-                  {tags.map(tag => (
-                    <button
-                      key={tag.id}
-                      type="button"
-                      onClick={() => toggleTag(tag.id)}
-                      className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
-                        form.selectedTags.includes(tag.id)
-                          ? 'border-blue-500 bg-blue-500/20 text-blue-300'
-                          : 'border-[#2d3748] text-gray-400 hover:border-gray-500'
-                      }`}
-                    >
-                      {tag.nombre}
-                    </button>
-                  ))}
+            <div style={{ backgroundColor: '#161b22', border: '1px solid #21262d', borderRadius: '12px', padding: '24px', marginBottom: '24px' }}>
+              <h2 style={{ color: 'white', fontSize: '15px', fontWeight: '600', margin: '0 0 20px' }}>Fechas</h2>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={labelStyle}>Fecha de inicio</label>
+                  <input type="date" value={form.fecha_inicio} onChange={e => set('fecha_inicio', e.target.value)} style={{ ...inputStyle, colorScheme: 'dark' }} />
+                </div>
+                <div>
+                  <label style={labelStyle}>Fecha estimada de fin</label>
+                  <input type="date" value={form.fecha_fin_estimada} onChange={e => set('fecha_fin_estimada', e.target.value)} style={{ ...inputStyle, colorScheme: 'dark' }} />
                 </div>
               </div>
-            )}
+            </div>
 
-            {/* Acciones */}
-            <div className="flex gap-3">
-              <Link
-                href="/projects"
-                className="flex-1 text-center border border-[#2d3748] text-gray-400 hover:text-white hover:border-gray-500 text-sm font-medium py-2.5 rounded-lg transition-colors"
-              >
-                Cancelar
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+              <Link href="/projects" style={{ textDecoration: 'none' }}>
+                <button type="button" style={{ backgroundColor: 'rgba(255,255,255,0.06)', color: '#9ca3af', border: 'none', borderRadius: '8px', padding: '10px 20px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' }}>
+                  Cancelar
+                </button>
               </Link>
               <button
                 type="submit"
-                disabled={loading}
-                className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm font-medium py-2.5 rounded-lg transition-colors"
+                disabled={saving}
+                style={{ backgroundColor: saving ? '#1e3a8a' : '#1d4ed8', color: 'white', border: 'none', borderRadius: '8px', padding: '10px 24px', fontSize: '14px', fontWeight: '600', cursor: saving ? 'not-allowed' : 'pointer' }}
               >
-                <Save className="w-4 h-4" />
-                {loading ? 'Guardando...' : 'Crear proyecto'}
+                {saving ? 'Creando...' : 'Crear proyecto'}
               </button>
             </div>
           </form>
         </div>
       </main>
+
+      <style>{`
+        input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.5); cursor: pointer; }
+        select option { background-color: #1c2333; color: white; }
+        input::placeholder, textarea::placeholder { color: #4b5563; }
+        input:focus, textarea:focus, select:focus { border-color: #3b82f6 !important; }
+      `}</style>
     </div>
   )
 }
