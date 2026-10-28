@@ -32,33 +32,76 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center" style={{ backgroundColor: '#1a3ed0' }}>
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: '#1a3ed0',
+      fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
+      padding: '16px',
+    }}>
       {/* Card */}
-      <div className="w-full max-w-sm mx-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-8 shadow-xl">
+      <div style={{
+        width: '100%',
+        maxWidth: '380px',
+        backgroundColor: 'rgba(255,255,255,0.12)',
+        border: '1px solid rgba(255,255,255,0.2)',
+        borderRadius: '20px',
+        padding: '40px 36px',
+        backdropFilter: 'blur(12px)',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
+      }}>
         {/* Logo */}
-        <div className="flex items-center justify-center gap-3 mb-8">
-          <AccusysLogo />
-          <div className="w-px h-8 bg-white/40" />
-          <span className="text-white text-2xl font-semibold tracking-wide">CyberFlow</span>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '14px', marginBottom: '32px' }}>
+          <span style={{ color: 'white', fontSize: '22px', fontWeight: '700', letterSpacing: '-0.3px' }}>
+            /accusys
+          </span>
+          <div style={{ width: '1px', height: '28px', backgroundColor: 'rgba(255,255,255,0.4)' }} />
+          <span style={{ color: 'white', fontSize: '20px', fontWeight: '600' }}>CyberFlow</span>
         </div>
 
-        <h2 className="text-white text-xl font-bold text-center mb-1">Bienvenido</h2>
-        <p className="text-blue-100 text-sm text-center mb-7">Ingresá con tu cuenta de Accusys</p>
+        <h2 style={{ color: 'white', fontSize: '20px', fontWeight: '700', textAlign: 'center', margin: '0 0 6px' }}>
+          Bienvenido
+        </h2>
+        <p style={{ color: 'rgba(219,234,254,0.85)', fontSize: '14px', textAlign: 'center', margin: '0 0 28px' }}>
+          Ingresá con tu cuenta de Accusys
+        </p>
 
         {error && (
-          <div className="bg-red-500/20 border border-red-400/40 text-red-100 text-sm rounded-xl p-3 mb-5 text-center">
+          <div style={{
+            backgroundColor: 'rgba(239,68,68,0.2)',
+            border: '1px solid rgba(239,68,68,0.4)',
+            color: '#fecaca',
+            fontSize: '14px',
+            borderRadius: '12px',
+            padding: '10px 14px',
+            marginBottom: '20px',
+            textAlign: 'center',
+          }}>
             {error}
           </div>
         )}
 
-        <form onSubmit={handleLogin} className="space-y-4">
+        <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <input
             type="email"
             required
             placeholder="Email"
             value={form.email}
             onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
-            className="w-full bg-white/90 text-gray-800 placeholder-gray-400 text-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-white/50"
+            style={{
+              width: '100%',
+              backgroundColor: 'rgba(255,255,255,0.92)',
+              color: '#1e293b',
+              border: 'none',
+              borderRadius: '12px',
+              padding: '13px 16px',
+              fontSize: '14px',
+              outline: 'none',
+              boxSizing: 'border-box',
+            }}
           />
           <input
             type="password"
@@ -66,37 +109,70 @@ export default function LoginPage() {
             placeholder="Contraseña"
             value={form.password}
             onChange={e => setForm(p => ({ ...p, password: e.target.value }))}
-            className="w-full bg-white/90 text-gray-800 placeholder-gray-400 text-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-white/50"
+            style={{
+              width: '100%',
+              backgroundColor: 'rgba(255,255,255,0.92)',
+              color: '#1e293b',
+              border: 'none',
+              borderRadius: '12px',
+              padding: '13px 16px',
+              fontSize: '14px',
+              outline: 'none',
+              boxSizing: 'border-box',
+            }}
           />
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-white hover:bg-blue-50 disabled:opacity-60 disabled:cursor-not-allowed text-blue-700 font-semibold py-3 px-4 rounded-xl transition-colors flex items-center justify-center gap-2 mt-1"
+            style={{
+              width: '100%',
+              backgroundColor: loading ? 'rgba(255,255,255,0.7)' : 'white',
+              color: '#1a3ed0',
+              border: 'none',
+              borderRadius: '12px',
+              padding: '13px 16px',
+              fontSize: '15px',
+              fontWeight: '600',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              marginTop: '4px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              transition: 'background-color 0.2s',
+            }}
           >
             {loading && (
-              <div className="w-4 h-4 border-2 border-blue-300 border-t-blue-700 rounded-full animate-spin" />
+              <div style={{
+                width: '16px',
+                height: '16px',
+                border: '2px solid #93c5fd',
+                borderTopColor: '#1a3ed0',
+                borderRadius: '50%',
+                animation: 'spin 0.7s linear infinite',
+              }} />
             )}
             {loading ? 'Ingresando...' : 'Ingresar'}
           </button>
         </form>
 
-        <p className="text-blue-200/70 text-xs text-center mt-6">
-          Usá tus credenciales de <strong className="text-blue-100">Accusys</strong> para acceder
+        <p style={{ color: 'rgba(191,219,254,0.6)', fontSize: '12px', textAlign: 'center', marginTop: '24px' }}>
+          Usá tus credenciales de <strong style={{ color: 'rgba(191,219,254,0.9)' }}>Accusys</strong> para acceder
         </p>
       </div>
 
       {/* Footer */}
-      <p className="text-blue-200/50 text-xs mt-8">© 2026 Accusys. Todos los derechos reservados.</p>
-    </div>
-  )
-}
+      <p style={{ color: 'rgba(191,219,254,0.4)', fontSize: '12px', marginTop: '28px' }}>
+        © 2026 Accusys. Todos los derechos reservados.
+      </p>
 
-function AccusysLogo() {
-  return (
-    <svg width="110" height="28" viewBox="0 0 110 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <text x="0" y="22" fontFamily="Arial, sans-serif" fontSize="22" fontWeight="700" fill="white" letterSpacing="-0.5">
-        /accusys
-      </text>
-    </svg>
+      <style>{`
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+        input::placeholder { color: #94a3b8; }
+        input:focus { box-shadow: 0 0 0 3px rgba(255,255,255,0.3); }
+      `}</style>
+    </div>
   )
 }
