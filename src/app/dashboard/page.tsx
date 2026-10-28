@@ -3,33 +3,37 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import Sidebar from '@/components/layout/Sidebar'
-import { FolderKanban, CheckSquare, Clock, AlertTriangle, TrendingUp } from 'lucide-react'
-import { Project, Task } from '@/types'
 import Link from 'next/link'
+import { Project, Task } from '@/types'
 
-const estadoColor: Record<string, string> = {
-  planificado: 'bg-gray-500/20 text-gray-400',
-  en_curso: 'bg-blue-500/20 text-blue-400',
-  pausado: 'bg-yellow-500/20 text-yellow-400',
-  completado: 'bg-green-500/20 text-green-400',
-  cancelado: 'bg-red-500/20 text-red-400',
+const estadoStyle: Record<string, { bg: string; color: string }> = {
+  planificado: { bg: 'rgba(107,114,128,0.15)', color: '#9ca3af' },
+  en_curso: { bg: 'rgba(59,130,246,0.15)', color: '#60a5fa' },
+  pausado: { bg: 'rgba(245,158,11,0.15)', color: '#fbbf24' },
+  completado: { bg: 'rgba(16,185,129,0.15)', color: '#34d399' },
+  cancelado: { bg: 'rgba(239,68,68,0.15)', color: '#f87171' },
 }
 
-const prioridadColor: Record<string, string> = {
-  baja: 'bg-gray-500/20 text-gray-400',
-  media: 'bg-blue-500/20 text-blue-400',
-  alta: 'bg-orange-500/20 text-orange-400',
-  critica: 'bg-red-500/20 text-red-400',
+const prioridadStyle: Record<string, { bg: string; color: string }> = {
+  baja: { bg: 'rgba(107,114,128,0.15)', color: '#9ca3af' },
+  media: { bg: 'rgba(59,130,246,0.15)', color: '#60a5fa' },
+  alta: { bg: 'rgba(249,115,22,0.15)', color: '#fb923c' },
+  critica: { bg: 'rgba(239,68,68,0.15)', color: '#f87171' },
 }
+
+const stats = [
+  { label: 'Proyectos activos', key: 'activos', accent: '#3b82f6' },
+  { label: 'Tareas en curso', key: 'tareas', accent: '#10b981' },
+  { label: 'Planificados', key: 'planificados', accent: '#f59e0b' },
+  { label: 'Prioridad crítica', key: 'criticos', accent: '#ef4444' },
+]
 
 export default function DashboardPage() {
   const [projects, setProjects] = useState<Project[]>([])
   const [tasks, setTasks] = useState<Task[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    fetchData()
-  }, [])
+  useEffect(() => { fetchData() }, [])
 
   const fetchData = async () => {
     const [{ data: proj }, { data: task }] = await Promise.all([
@@ -41,108 +45,116 @@ export default function DashboardPage() {
     setLoading(false)
   }
 
-  const stats = [
-    { label: 'Proyectos activos', value: projects.filter(p => p.estado === 'en_curso').length, icon: FolderKanban, color: 'text-blue-400', bg: 'bg-blue-500/10' },
-    { label: 'Tareas en curso', value: tasks.length, icon: CheckSquare, color: 'text-green-400', bg: 'bg-green-500/10' },
-    { label: 'Proyectos planificados', value: projects.filter(p => p.estado === 'planificado').length, icon: Clock, color: 'text-yellow-400', bg: 'bg-yellow-500/10' },
-    { label: 'Prioridad crítica', value: projects.filter(p => p.prioridad === 'critica').length, icon: AlertTriangle, color: 'text-red-400', bg: 'bg-red-500/10' },
-  ]
+  const counts = {
+    activos: projects.filter(p => p.estado === 'en_curso').length,
+    tareas: tasks.length,
+    planificados: projects.filter(p => p.estado === 'planificado').length,
+    criticos: projects.filter(p => p.prioridad === 'critica').length,
+  }
 
   return (
-    <div className="flex min-h-screen bg-[#0f1117]">
+    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#0d1117', fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif' }}>
       <Sidebar />
-      <main className="flex-1 p-6 overflow-auto">
-        <div className="max-w-6xl mx-auto">
+      <main style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
+        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+
           {/* Header */}
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-              <TrendingUp className="w-6 h-6 text-blue-400" />
-              Dashboard
-            </h1>
-            <p className="text-gray-400 text-sm mt-1">Resumen general de proyectos y tareas</p>
+          <div style={{ marginBottom: '28px' }}>
+            <h1 style={{ color: 'white', fontSize: '22px', fontWeight: '700', margin: '0 0 4px' }}>Dashboard</h1>
+            <p style={{ color: '#6b7280', fontSize: '14px', margin: 0 }}>Resumen general de proyectos y tareas</p>
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            {stats.map(({ label, value, icon: Icon, color, bg }) => (
-              <div key={label} className="bg-[#1a1f2e] border border-[#2d3748] rounded-xl p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <p className="text-sm text-gray-400">{label}</p>
-                  <div className={`p-2 rounded-lg ${bg}`}>
-                    <Icon className={`w-4 h-4 ${color}`} />
-                  </div>
-                </div>
-                <p className={`text-3xl font-bold ${color}`}>{loading ? '–' : value}</p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '28px' }}>
+            {stats.map(({ label, key, accent }) => (
+              <div key={key} style={{
+                backgroundColor: '#161b22',
+                border: '1px solid #21262d',
+                borderRadius: '12px',
+                padding: '20px',
+              }}>
+                <p style={{ color: '#8b949e', fontSize: '13px', margin: '0 0 12px' }}>{label}</p>
+                <p style={{ color: accent, fontSize: '32px', fontWeight: '700', margin: 0 }}>
+                  {loading ? '–' : counts[key as keyof typeof counts]}
+                </p>
               </div>
             ))}
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-6">
+          {/* Two columns */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+
             {/* Proyectos recientes */}
-            <div className="bg-[#1a1f2e] border border-[#2d3748] rounded-xl p-5">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="font-semibold text-white">Proyectos recientes</h2>
-                <Link href="/projects" className="text-xs text-blue-400 hover:text-blue-300">Ver todos →</Link>
+            <div style={{ backgroundColor: '#161b22', border: '1px solid #21262d', borderRadius: '12px', padding: '20px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                <h2 style={{ color: 'white', fontSize: '15px', fontWeight: '600', margin: 0 }}>Proyectos recientes</h2>
+                <Link href="/projects" style={{ color: '#3b82f6', fontSize: '12px', textDecoration: 'none' }}>Ver todos →</Link>
               </div>
               {loading ? (
-                <div className="space-y-3">
-                  {[...Array(3)].map((_, i) => (
-                    <div key={i} className="h-14 bg-white/5 rounded-lg animate-pulse" />
-                  ))}
-                </div>
+                <p style={{ color: '#6b7280', fontSize: '13px', textAlign: 'center', padding: '20px 0' }}>Cargando...</p>
               ) : projects.length === 0 ? (
-                <p className="text-gray-500 text-sm text-center py-4">No hay proyectos aún</p>
+                <p style={{ color: '#6b7280', fontSize: '13px', textAlign: 'center', padding: '20px 0' }}>No hay proyectos aún</p>
               ) : (
-                <div className="space-y-2">
-                  {projects.map(p => (
-                    <Link key={p.id} href={`/projects/${p.id}`}>
-                      <div className="flex items-center justify-between p-3 rounded-lg hover:bg-white/5 transition-colors cursor-pointer">
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-white truncate">{p.nombre}</p>
-                          <p className="text-xs text-gray-500">{p.area?.nombre || 'Sin área'}</p>
+                <div>
+                  {projects.map(p => {
+                    const es = estadoStyle[p.estado] || estadoStyle.planificado
+                    const ps = prioridadStyle[p.prioridad] || prioridadStyle.baja
+                    return (
+                      <Link key={p.id} href={`/projects/${p.id}`} style={{ textDecoration: 'none' }}>
+                        <div style={{
+                          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                          padding: '10px 8px', borderRadius: '8px', marginBottom: '2px',
+                          cursor: 'pointer',
+                        }}>
+                          <div style={{ flex: 1, minWidth: 0, marginRight: '12px' }}>
+                            <p style={{ color: 'white', fontSize: '13px', fontWeight: '500', margin: '0 0 2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.nombre}</p>
+                            <p style={{ color: '#6b7280', fontSize: '11px', margin: 0 }}>{(p as any).area?.nombre || 'Sin área'}</p>
+                          </div>
+                          <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
+                            <span style={{ fontSize: '11px', padding: '2px 8px', borderRadius: '20px', backgroundColor: es.bg, color: es.color }}>
+                              {p.estado.replace('_', ' ')}
+                            </span>
+                            <span style={{ fontSize: '11px', padding: '2px 8px', borderRadius: '20px', backgroundColor: ps.bg, color: ps.color }}>
+                              {p.prioridad}
+                            </span>
+                          </div>
                         </div>
-                        <div className="flex gap-2 ml-3 flex-shrink-0">
-                          <span className={`text-xs px-2 py-0.5 rounded-full ${estadoColor[p.estado]}`}>
-                            {p.estado.replace('_', ' ')}
-                          </span>
-                          <span className={`text-xs px-2 py-0.5 rounded-full ${prioridadColor[p.prioridad]}`}>
-                            {p.prioridad}
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
+                      </Link>
+                    )
+                  })}
                 </div>
               )}
             </div>
 
             {/* Tareas en curso */}
-            <div className="bg-[#1a1f2e] border border-[#2d3748] rounded-xl p-5">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="font-semibold text-white">Tareas en curso</h2>
-                <Link href="/tasks" className="text-xs text-blue-400 hover:text-blue-300">Ver todas →</Link>
+            <div style={{ backgroundColor: '#161b22', border: '1px solid #21262d', borderRadius: '12px', padding: '20px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                <h2 style={{ color: 'white', fontSize: '15px', fontWeight: '600', margin: 0 }}>Tareas en curso</h2>
+                <Link href="/tasks" style={{ color: '#3b82f6', fontSize: '12px', textDecoration: 'none' }}>Ver todas →</Link>
               </div>
               {loading ? (
-                <div className="space-y-3">
-                  {[...Array(3)].map((_, i) => (
-                    <div key={i} className="h-14 bg-white/5 rounded-lg animate-pulse" />
-                  ))}
-                </div>
+                <p style={{ color: '#6b7280', fontSize: '13px', textAlign: 'center', padding: '20px 0' }}>Cargando...</p>
               ) : tasks.length === 0 ? (
-                <p className="text-gray-500 text-sm text-center py-4">No hay tareas en curso</p>
+                <p style={{ color: '#6b7280', fontSize: '13px', textAlign: 'center', padding: '20px 0' }}>No hay tareas en curso</p>
               ) : (
-                <div className="space-y-2">
-                  {tasks.map(t => (
-                    <div key={t.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-white/5 transition-colors">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-white truncate">{t.titulo}</p>
-                        <p className="text-xs text-gray-500">{(t as any).project?.nombre}</p>
+                <div>
+                  {tasks.map(t => {
+                    const ps = prioridadStyle[t.prioridad] || prioridadStyle.baja
+                    return (
+                      <div key={t.id} style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        padding: '10px 8px', borderRadius: '8px', marginBottom: '2px',
+                      }}>
+                        <div style={{ flex: 1, minWidth: 0, marginRight: '12px' }}>
+                          <p style={{ color: 'white', fontSize: '13px', fontWeight: '500', margin: '0 0 2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.titulo}</p>
+                          <p style={{ color: '#6b7280', fontSize: '11px', margin: 0 }}>{(t as any).project?.nombre}</p>
+                        </div>
+                        <span style={{ fontSize: '11px', padding: '2px 8px', borderRadius: '20px', backgroundColor: ps.bg, color: ps.color, flexShrink: 0 }}>
+                          {t.prioridad}
+                        </span>
                       </div>
-                      <span className={`text-xs px-2 py-0.5 rounded-full ml-3 flex-shrink-0 ${prioridadColor[t.prioridad]}`}>
-                        {t.prioridad}
-                      </span>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               )}
             </div>
