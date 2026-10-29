@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import Sidebar from '@/components/layout/Sidebar'
+import Navbar from '@/components/layout/Navbar'
 import Link from 'next/link'
 import { Project } from '@/types'
 
@@ -47,9 +47,9 @@ export default function ProjectsPage() {
   ]
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#0d1117', fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif' }}>
-      <Sidebar />
-      <main style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: '#0a0a0f', fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif' }}>
+      <Navbar />
+      <main style={{ padding: '40px 24px', maxWidth: '1200px', margin: '0 auto' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '28px' }}>
             <div>
@@ -57,7 +57,7 @@ export default function ProjectsPage() {
               <p style={{ color: '#6b7280', fontSize: '14px', margin: 0 }}>{projects.length} proyectos en total</p>
             </div>
             <Link href="/projects/new" style={{ textDecoration: 'none' }}>
-              <button style={{ backgroundColor: '#1d4ed8', color: 'white', border: 'none', borderRadius: '10px', padding: '10px 18px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>
+              <button style={{ backgroundColor: '#1a5ce8', color: 'white', border: 'none', borderRadius: '10px', padding: '10px 18px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>
                 + Nuevo proyecto
               </button>
             </Link>
@@ -68,7 +68,7 @@ export default function ProjectsPage() {
             {filters.map(f => (
               <button key={f.key} onClick={() => setFilter(f.key)} style={{
                 padding: '6px 14px', borderRadius: '20px', fontSize: '13px', fontWeight: '500', cursor: 'pointer', border: 'none',
-                backgroundColor: filter === f.key ? '#1d4ed8' : 'rgba(255,255,255,0.06)',
+                backgroundColor: filter === f.key ? '#1a5ce8' : 'rgba(255,255,255,0.06)',
                 color: filter === f.key ? 'white' : '#9ca3af',
               }}>{f.label}</button>
             ))}
@@ -85,7 +85,7 @@ export default function ProjectsPage() {
                 const ps = prioridadStyle[p.prioridad] || prioridadStyle.baja
                 return (
                   <Link key={p.id} href={`/projects/${p.id}`} style={{ textDecoration: 'none' }}>
-                    <div style={{ backgroundColor: '#161b22', border: '1px solid #21262d', borderRadius: '12px', padding: '20px', cursor: 'pointer' }}>
+                    <div style={{ backgroundColor: '#1a1a1f', border: '1px solid #21262d', borderRadius: '12px', padding: '20px', cursor: 'pointer' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
                         <h3 style={{ color: 'white', fontSize: '14px', fontWeight: '600', margin: 0, flex: 1, marginRight: '8px' }}>{p.nombre}</h3>
                         <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>

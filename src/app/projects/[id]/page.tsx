@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import Sidebar from '@/components/layout/Sidebar'
+import Navbar from '@/components/layout/Navbar'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { Project, Task, Area } from '@/types'
@@ -32,7 +32,7 @@ const prioridadStyle: Record<string, { bg: string; color: string }> = {
 }
 
 const input = {
-  width: '100%', backgroundColor: '#0d1117', border: '1px solid #30363d',
+  width: '100%', backgroundColor: '#111114', border: '1px solid #30363d',
   borderRadius: '8px', padding: '8px 12px', color: 'white', fontSize: '13px',
   outline: 'none', boxSizing: 'border-box' as const,
 }
@@ -167,23 +167,23 @@ export default function ProjectDetailPage() {
   }
 
   if (loading) return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#0d1117' }}>
-      <Sidebar />
-      <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: '#0a0a0f', fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif' }}>
+      <Navbar />
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 'calc(100vh - 56px)' }}>
         <p style={{ color: '#6b7280' }}>Cargando...</p>
-      </main>
+      </div>
     </div>
   )
 
   if (!project) return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#0d1117' }}>
-      <Sidebar />
-      <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: '#0a0a0f', fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif' }}>
+      <Navbar />
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 'calc(100vh - 56px)' }}>
         <div style={{ textAlign: 'center' }}>
           <p style={{ color: 'white', fontSize: '18px', marginBottom: '8px' }}>Proyecto no encontrado</p>
-          <Link href="/projects" style={{ color: '#3b82f6', fontSize: '14px' }}>← Volver a proyectos</Link>
+          <Link href="/projects" style={{ color: '#4f8ef7', fontSize: '14px' }}>← Volver a proyectos</Link>
         </div>
-      </main>
+      </div>
     </div>
   )
 
@@ -193,17 +193,17 @@ export default function ProjectDetailPage() {
   const progreso = tasks.length > 0 ? Math.round((completadas / tasks.length) * 100) : 0
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#0d1117', fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif' }}>
-      <Sidebar />
-      <main style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
-        <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: '#0a0a0f', fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif' }}>
+      <Navbar />
+      <main style={{ maxWidth: '1000px', margin: '0 auto', padding: '40px 24px' }}>
+        <div>
 
           <Link href="/projects" style={{ color: '#6b7280', fontSize: '13px', textDecoration: 'none', display: 'inline-block', marginBottom: '20px' }}>
             ← Proyectos
           </Link>
 
           {/* ── HEADER DEL PROYECTO ── */}
-          <div style={{ backgroundColor: '#161b22', border: '1px solid #21262d', borderRadius: '12px', padding: '24px', marginBottom: '20px' }}>
+          <div style={{ backgroundColor: '#1a1a1f', border: '1px solid #222228', borderRadius: '12px', padding: '24px', marginBottom: '20px' }}>
             {!editMode ? (
               <>
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '12px' }}>
@@ -248,8 +248,8 @@ export default function ProjectDetailPage() {
                 })()}
 
                 {tasks.length > 0 && (
-                  <div style={{ marginTop: '16px', height: '6px', backgroundColor: '#21262d', borderRadius: '3px', overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${progreso}%`, backgroundColor: '#3b82f6', borderRadius: '3px' }} />
+                  <div style={{ marginTop: '16px', height: '6px', backgroundColor: '#222228', borderRadius: '3px', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${progreso}%`, backgroundColor: '#4f8ef7', borderRadius: '3px' }} />
                   </div>
                 )}
               </>
@@ -298,7 +298,7 @@ export default function ProjectDetailPage() {
                     </div>
                   </div>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                    <input type="checkbox" checked={editForm.es_transversal} onChange={e => setEditForm((p: any) => ({ ...p, es_transversal: e.target.checked }))} style={{ accentColor: '#3b82f6' }} />
+                    <input type="checkbox" checked={editForm.es_transversal} onChange={e => setEditForm((p: any) => ({ ...p, es_transversal: e.target.checked }))} style={{ accentColor: '#4f8ef7' }} />
                     <span style={{ color: '#9ca3af', fontSize: '13px' }}>Proyecto transversal</span>
                   </label>
                   {/* RAG */}
@@ -319,26 +319,26 @@ export default function ProjectDetailPage() {
                 </div>
                 <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '20px' }}>
                   <button onClick={() => setEditMode(false)} style={{ backgroundColor: 'rgba(255,255,255,0.06)', color: '#9ca3af', border: 'none', borderRadius: '8px', padding: '8px 18px', fontSize: '13px', cursor: 'pointer' }}>Cancelar</button>
-                  <button onClick={handleSaveProject} disabled={saving} style={{ backgroundColor: '#1d4ed8', color: 'white', border: 'none', borderRadius: '8px', padding: '8px 20px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>{saving ? 'Guardando...' : 'Guardar cambios'}</button>
+                  <button onClick={handleSaveProject} disabled={saving} style={{ backgroundColor: '#1a5ce8', color: 'white', border: 'none', borderRadius: '8px', padding: '8px 20px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>{saving ? 'Guardando...' : 'Guardar cambios'}</button>
                 </div>
               </div>
             )}
           </div>
 
           {/* ── TAREAS ── */}
-          <div style={{ backgroundColor: '#161b22', border: '1px solid #21262d', borderRadius: '12px', padding: '20px' }}>
+          <div style={{ backgroundColor: '#1a1a1f', border: '1px solid #222228', borderRadius: '12px', padding: '20px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
               <h2 style={{ color: 'white', fontSize: '15px', fontWeight: '600', margin: 0 }}>
                 Tareas <span style={{ color: '#6b7280', fontWeight: '400' }}>({tasks.length})</span>
               </h2>
-              <button onClick={() => setShowNewTask(!showNewTask)} style={{ backgroundColor: '#1d4ed8', color: 'white', border: 'none', borderRadius: '8px', padding: '7px 16px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>
+              <button onClick={() => setShowNewTask(!showNewTask)} style={{ backgroundColor: '#1a5ce8', color: 'white', border: 'none', borderRadius: '8px', padding: '7px 16px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>
                 + Nueva tarea
               </button>
             </div>
 
             {/* Formulario nueva tarea */}
             {showNewTask && (
-              <form onSubmit={handleAddTask} style={{ backgroundColor: '#0d1117', border: '1px solid #30363d', borderRadius: '10px', padding: '16px', marginBottom: '16px' }}>
+              <form onSubmit={handleAddTask} style={{ backgroundColor: '#111114', border: '1px solid #30363d', borderRadius: '10px', padding: '16px', marginBottom: '16px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   <input type="text" required placeholder="Título de la tarea *" value={newTask.titulo} onChange={e => setNewTask(p => ({ ...p, titulo: e.target.value }))} style={input} />
                   <textarea placeholder="Descripción (opcional)" value={newTask.descripcion} onChange={e => setNewTask(p => ({ ...p, descripcion: e.target.value }))} rows={2} style={{ ...input, resize: 'vertical' }} />
@@ -356,7 +356,7 @@ export default function ProjectDetailPage() {
                   </div>
                   <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
                     <button type="button" onClick={() => setShowNewTask(false)} style={{ backgroundColor: 'transparent', color: '#6b7280', border: 'none', padding: '7px 14px', fontSize: '13px', cursor: 'pointer' }}>Cancelar</button>
-                    <button type="submit" disabled={savingTask} style={{ backgroundColor: '#1d4ed8', color: 'white', border: 'none', borderRadius: '8px', padding: '7px 18px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>{savingTask ? 'Guardando...' : 'Agregar tarea'}</button>
+                    <button type="submit" disabled={savingTask} style={{ backgroundColor: '#1a5ce8', color: 'white', border: 'none', borderRadius: '8px', padding: '7px 18px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>{savingTask ? 'Guardando...' : 'Agregar tarea'}</button>
                   </div>
                 </div>
               </form>
@@ -372,7 +372,7 @@ export default function ProjectDetailPage() {
                   const isEditing = editingTask === t.id
 
                   return (
-                    <div key={t.id} style={{ borderBottom: i < tasks.length - 1 ? '1px solid #21262d' : 'none' }}>
+                    <div key={t.id} style={{ borderBottom: i < tasks.length - 1 ? '1px solid #222228' : 'none' }}>
                       {!isEditing ? (
                         <div style={{ display: 'flex', alignItems: 'center', padding: '12px 8px', gap: '12px' }}>
                           {/* Checkbox */}
@@ -382,7 +382,7 @@ export default function ProjectDetailPage() {
                             backgroundColor: t.estado === 'completada' ? '#34d399' : 'transparent',
                             flexShrink: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
                           }}>
-                            {t.estado === 'completada' && <span style={{ color: '#0d1117', fontSize: '10px', fontWeight: '700' }}>✓</span>}
+                            {t.estado === 'completada' && <span style={{ color: '#111114', fontSize: '10px', fontWeight: '700' }}>✓</span>}
                           </button>
 
                           <div style={{ flex: 1, minWidth: 0 }}>
@@ -424,7 +424,7 @@ export default function ProjectDetailPage() {
                             </div>
                             <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                               <button onClick={() => setEditingTask(null)} style={{ background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer', fontSize: '13px', padding: '6px 12px' }}>Cancelar</button>
-                              <button onClick={() => handleSaveTask(t.id)} style={{ backgroundColor: '#1d4ed8', color: 'white', border: 'none', borderRadius: '8px', padding: '6px 16px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Guardar</button>
+                              <button onClick={() => handleSaveTask(t.id)} style={{ backgroundColor: '#1a5ce8', color: 'white', border: 'none', borderRadius: '8px', padding: '6px 16px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Guardar</button>
                             </div>
                           </div>
                         </div>
@@ -441,7 +441,7 @@ export default function ProjectDetailPage() {
       {/* ── MODAL ELIMINAR PROYECTO ── */}
       {showDeleteConfirm && (
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
-          <div style={{ backgroundColor: '#161b22', border: '1px solid #21262d', borderRadius: '16px', padding: '32px', maxWidth: '400px', width: '90%' }}>
+          <div style={{ backgroundColor: '#1a1a1f', border: '1px solid #222228', borderRadius: '16px', padding: '32px', maxWidth: '400px', width: '90%' }}>
             <h3 style={{ color: 'white', fontSize: '18px', fontWeight: '700', margin: '0 0 12px' }}>¿Eliminar proyecto?</h3>
             <p style={{ color: '#9ca3af', fontSize: '14px', margin: '0 0 24px', lineHeight: '1.5' }}>
               Se eliminará <strong style={{ color: 'white' }}>{project.nombre}</strong> y todas sus tareas. Esta acción no se puede deshacer.
@@ -454,10 +454,12 @@ export default function ProjectDetailPage() {
         </div>
       )}
 
+      </div>
+      </main>
       <style>{`
-        select option { background-color: #1c2333; color: white; }
+        select option { background-color: #111114; color: white; }
         input::placeholder, textarea::placeholder { color: #4b5563; }
-        input:focus, textarea:focus, select:focus { border-color: #3b82f6 !important; }
+        input:focus, textarea:focus, select:focus { border-color: #4f8ef7 !important; }
         input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.5); cursor: pointer; }
       `}</style>
     </div>

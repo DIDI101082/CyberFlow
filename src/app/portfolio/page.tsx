@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import Sidebar from '@/components/layout/Sidebar'
+import Navbar from '@/components/layout/Navbar'
 import Link from 'next/link'
 import { Project } from '@/types'
 
@@ -68,9 +68,9 @@ export default function PortfolioPage() {
   }
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#0d1117', fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif' }}>
-      <Sidebar />
-      <main style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: '#0a0a0f', fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif' }}>
+      <Navbar />
+      <main style={{ padding: '40px 24px', maxWidth: '1200px', margin: '0 auto' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
 
           {/* Header */}
@@ -84,7 +84,7 @@ export default function PortfolioPage() {
             {(['verde','amarillo','rojo'] as const).map(rag => {
               const r = RAG[rag]
               return (
-                <div key={rag} style={{ backgroundColor: '#161b22', border: `1px solid ${r.color}30`, borderRadius: '12px', padding: '20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div key={rag} style={{ backgroundColor: '#1a1a1f', border: `1px solid ${r.color}30`, borderRadius: '12px', padding: '20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
                   <div style={{ width: '16px', height: '16px', borderRadius: '50%', backgroundColor: r.dot, flexShrink: 0, boxShadow: `0 0 8px ${r.dot}` }} />
                   <div>
                     <p style={{ color: r.color, fontSize: '28px', fontWeight: '700', margin: '0 0 2px' }}>{counts[rag]}</p>
@@ -100,10 +100,10 @@ export default function PortfolioPage() {
             {/* Estado */}
             <div style={{ display: 'flex', gap: '6px' }}>
               {[['activos','Activos'],['todos','Todos'],['completado','Completados']].map(([k, l]) => (
-                <button key={k} onClick={() => setFilterEstado(k)} style={{ padding: '6px 14px', borderRadius: '20px', fontSize: '12px', border: 'none', cursor: 'pointer', backgroundColor: filterEstado === k ? '#1d4ed8' : 'rgba(255,255,255,0.06)', color: filterEstado === k ? 'white' : '#9ca3af' }}>{l}</button>
+                <button key={k} onClick={() => setFilterEstado(k)} style={{ padding: '6px 14px', borderRadius: '20px', fontSize: '12px', border: 'none', cursor: 'pointer', backgroundColor: filterEstado === k ? '#1a5ce8' : 'rgba(255,255,255,0.06)', color: filterEstado === k ? 'white' : '#9ca3af' }}>{l}</button>
               ))}
             </div>
-            <div style={{ width: '1px', height: '20px', backgroundColor: '#21262d' }} />
+            <div style={{ width: '1px', height: '20px', backgroundColor: '#222228' }} />
             {/* RAG */}
             <div style={{ display: 'flex', gap: '6px' }}>
               <button onClick={() => setFilterRAG('todos')} style={{ padding: '6px 14px', borderRadius: '20px', fontSize: '12px', border: 'none', cursor: 'pointer', backgroundColor: filterRAG === 'todos' ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.04)', color: filterRAG === 'todos' ? 'white' : '#9ca3af' }}>Todos</button>
@@ -113,9 +113,9 @@ export default function PortfolioPage() {
                 </button>
               ))}
             </div>
-            <div style={{ width: '1px', height: '20px', backgroundColor: '#21262d' }} />
+            <div style={{ width: '1px', height: '20px', backgroundColor: '#222228' }} />
             {/* Área */}
-            <select value={filterArea} onChange={e => setFilterArea(e.target.value)} style={{ backgroundColor: '#161b22', border: '1px solid #30363d', borderRadius: '8px', padding: '6px 12px', color: '#9ca3af', fontSize: '12px', outline: 'none', cursor: 'pointer' }}>
+            <select value={filterArea} onChange={e => setFilterArea(e.target.value)} style={{ backgroundColor: '#1a1a1f', border: '1px solid #30363d', borderRadius: '8px', padding: '6px 12px', color: '#9ca3af', fontSize: '12px', outline: 'none', cursor: 'pointer' }}>
               <option value="todas">Todas las áreas</option>
               {areas.map(a => <option key={a.id} value={a.id}>{a.nombre}</option>)}
             </select>
@@ -127,9 +127,9 @@ export default function PortfolioPage() {
           ) : filtered.length === 0 ? (
             <p style={{ color: '#6b7280', textAlign: 'center', padding: '60px 0' }}>No hay proyectos con estos filtros</p>
           ) : (
-            <div style={{ backgroundColor: '#161b22', border: '1px solid #21262d', borderRadius: '12px', overflow: 'hidden' }}>
+            <div style={{ backgroundColor: '#1a1a1f', border: '1px solid #21262d', borderRadius: '12px', overflow: 'hidden' }}>
               {/* Cabecera */}
-              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 120px 130px 110px 100px', gap: '0', padding: '10px 20px', borderBottom: '1px solid #21262d', backgroundColor: '#0d1117' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 120px 130px 110px 100px', gap: '0', padding: '10px 20px', borderBottom: '1px solid #21262d', backgroundColor: '#111114' }}>
                 {['Proyecto','Área','Estado','Semáforo','Prioridad','Progreso'].map(h => (
                   <p key={h} style={{ color: '#6b7280', fontSize: '11px', fontWeight: '600', margin: 0, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</p>
                 ))}

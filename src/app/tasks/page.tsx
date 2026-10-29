@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import Sidebar from '@/components/layout/Sidebar'
+import Navbar from '@/components/layout/Navbar'
 import { Task } from '@/types'
 
 const estadoStyle: Record<string, { bg: string; color: string; label: string }> = {
@@ -45,9 +45,9 @@ export default function TasksPage() {
   ]
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#0d1117', fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif' }}>
-      <Sidebar />
-      <main style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: '#0a0a0f', fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif' }}>
+      <Navbar />
+      <main style={{ padding: '40px 24px', maxWidth: '1200px', margin: '0 auto' }}>
         <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
           <div style={{ marginBottom: '28px' }}>
             <h1 style={{ color: 'white', fontSize: '22px', fontWeight: '700', margin: '0 0 4px' }}>Mis Tareas</h1>
@@ -58,7 +58,7 @@ export default function TasksPage() {
             {filters.map(f => (
               <button key={f.key} onClick={() => setFilter(f.key)} style={{
                 padding: '6px 14px', borderRadius: '20px', fontSize: '13px', fontWeight: '500', cursor: 'pointer', border: 'none',
-                backgroundColor: filter === f.key ? '#1d4ed8' : 'rgba(255,255,255,0.06)',
+                backgroundColor: filter === f.key ? '#1a5ce8' : 'rgba(255,255,255,0.06)',
                 color: filter === f.key ? 'white' : '#9ca3af',
               }}>{f.label}</button>
             ))}
@@ -69,7 +69,7 @@ export default function TasksPage() {
           ) : filtered.length === 0 ? (
             <p style={{ color: '#6b7280', textAlign: 'center', padding: '60px 0' }}>No hay tareas</p>
           ) : (
-            <div style={{ backgroundColor: '#161b22', border: '1px solid #21262d', borderRadius: '12px', overflow: 'hidden' }}>
+            <div style={{ backgroundColor: '#1a1a1f', border: '1px solid #21262d', borderRadius: '12px', overflow: 'hidden' }}>
               {filtered.map((t, i) => {
                 const es = estadoStyle[t.estado] || estadoStyle.pendiente
                 const ps = prioridadStyle[t.prioridad] || prioridadStyle.baja

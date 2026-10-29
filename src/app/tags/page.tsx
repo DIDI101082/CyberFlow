@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import Sidebar from '@/components/layout/Sidebar'
+import Navbar from '@/components/layout/Navbar'
 import { Tag } from '@/types'
 
 export default function TagsPage() {
   const [tags, setTags] = useState<Tag[]>([])
   const [loading, setLoading] = useState(true)
-  const [newTag, setNewTag] = useState({ nombre: '', color: '#3b82f6' })
+  const [newTag, setNewTag] = useState({ nombre: '', color: '#4f8ef7' })
   const [saving, setSaving] = useState(false)
 
   useEffect(() => { fetchTags() }, [])
@@ -24,7 +24,7 @@ export default function TagsPage() {
     if (!newTag.nombre.trim()) return
     setSaving(true)
     await supabase.from('tags').insert([{ nombre: newTag.nombre.trim(), color: newTag.color }])
-    setNewTag({ nombre: '', color: '#3b82f6' })
+    setNewTag({ nombre: '', color: '#4f8ef7' })
     await fetchTags()
     setSaving(false)
   }
@@ -35,9 +35,9 @@ export default function TagsPage() {
   }
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#0d1117', fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif' }}>
-      <Sidebar />
-      <main style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: '#0a0a0f', fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif' }}>
+      <Navbar />
+      <main style={{ padding: '40px 24px', maxWidth: '1200px', margin: '0 auto' }}>
         <div style={{ maxWidth: '700px', margin: '0 auto' }}>
           <div style={{ marginBottom: '28px' }}>
             <h1 style={{ color: 'white', fontSize: '22px', fontWeight: '700', margin: '0 0 4px' }}>Etiquetas</h1>
@@ -45,7 +45,7 @@ export default function TagsPage() {
           </div>
 
           {/* Create form */}
-          <div style={{ backgroundColor: '#161b22', border: '1px solid #21262d', borderRadius: '12px', padding: '20px', marginBottom: '24px' }}>
+          <div style={{ backgroundColor: '#1a1a1f', border: '1px solid #21262d', borderRadius: '12px', padding: '20px', marginBottom: '24px' }}>
             <h2 style={{ color: 'white', fontSize: '15px', fontWeight: '600', margin: '0 0 16px' }}>Nueva etiqueta</h2>
             <form onSubmit={handleCreate} style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
               <input
@@ -53,7 +53,7 @@ export default function TagsPage() {
                 placeholder="Nombre de la etiqueta"
                 value={newTag.nombre}
                 onChange={e => setNewTag(p => ({ ...p, nombre: e.target.value }))}
-                style={{ flex: 1, backgroundColor: '#0d1117', border: '1px solid #30363d', borderRadius: '8px', padding: '10px 14px', color: 'white', fontSize: '14px', outline: 'none' }}
+                style={{ flex: 1, backgroundColor: '#111114', border: '1px solid #30363d', borderRadius: '8px', padding: '10px 14px', color: 'white', fontSize: '14px', outline: 'none' }}
               />
               <input
                 type="color"
@@ -61,7 +61,7 @@ export default function TagsPage() {
                 onChange={e => setNewTag(p => ({ ...p, color: e.target.value }))}
                 style={{ width: '40px', height: '40px', border: 'none', borderRadius: '8px', cursor: 'pointer', backgroundColor: 'transparent' }}
               />
-              <button type="submit" disabled={saving} style={{ backgroundColor: '#1d4ed8', color: 'white', border: 'none', borderRadius: '8px', padding: '10px 18px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>
+              <button type="submit" disabled={saving} style={{ backgroundColor: '#1a5ce8', color: 'white', border: 'none', borderRadius: '8px', padding: '10px 18px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>
                 {saving ? '...' : 'Crear'}
               </button>
             </form>
@@ -73,7 +73,7 @@ export default function TagsPage() {
           ) : tags.length === 0 ? (
             <p style={{ color: '#6b7280', textAlign: 'center' }}>No hay etiquetas aún</p>
           ) : (
-            <div style={{ backgroundColor: '#161b22', border: '1px solid #21262d', borderRadius: '12px', overflow: 'hidden' }}>
+            <div style={{ backgroundColor: '#1a1a1f', border: '1px solid #21262d', borderRadius: '12px', overflow: 'hidden' }}>
               {tags.map((tag, i) => (
                 <div key={tag.id} style={{
                   display: 'flex', alignItems: 'center', padding: '14px 20px',

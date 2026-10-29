@@ -2,17 +2,17 @@
 
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import Sidebar from '@/components/layout/Sidebar'
+import Navbar from '@/components/layout/Navbar'
 import { Area } from '@/types'
 
-const COLORES = ['#3b82f6','#8b5cf6','#10b981','#f59e0b','#ef4444','#ec4899','#06b6d4','#84cc16']
+const COLORES = ['#4f8ef7','#8b5cf6','#10b981','#f59e0b','#ef4444','#ec4899','#06b6d4','#84cc16']
 
 export default function AreasPage() {
   const [areas, setAreas] = useState<Area[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
-  const [form, setForm] = useState({ nombre: '', descripcion: '', color: '#3b82f6' })
+  const [form, setForm] = useState({ nombre: '', descripcion: '', color: '#4f8ef7' })
   const [saving, setSaving] = useState(false)
 
   useEffect(() => { fetchAreas() }, [])
@@ -32,7 +32,7 @@ export default function AreasPage() {
     } else {
       await supabase.from('areas').insert([{ nombre: form.nombre, descripcion: form.descripcion || null, color: form.color }])
     }
-    setForm({ nombre: '', descripcion: '', color: '#3b82f6' })
+    setForm({ nombre: '', descripcion: '', color: '#4f8ef7' })
     setShowForm(false)
     setEditingId(null)
     await fetchAreas()
@@ -54,15 +54,15 @@ export default function AreasPage() {
   const handleCancel = () => {
     setShowForm(false)
     setEditingId(null)
-    setForm({ nombre: '', descripcion: '', color: '#3b82f6' })
+    setForm({ nombre: '', descripcion: '', color: '#4f8ef7' })
   }
 
-  const inp = { width: '100%', backgroundColor: '#0d1117', border: '1px solid #30363d', borderRadius: '8px', padding: '9px 12px', color: 'white', fontSize: '13px', outline: 'none', boxSizing: 'border-box' as const }
+  const inp = { width: '100%', backgroundColor: '#111114', border: '1px solid #30363d', borderRadius: '8px', padding: '9px 12px', color: 'white', fontSize: '13px', outline: 'none', boxSizing: 'border-box' as const }
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#0d1117', fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif' }}>
-      <Sidebar />
-      <main style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: '#0a0a0f', fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif' }}>
+      <Navbar />
+      <main style={{ padding: '40px 24px', maxWidth: '1200px', margin: '0 auto' }}>
         <div style={{ maxWidth: '720px', margin: '0 auto' }}>
 
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '28px' }}>
@@ -71,7 +71,7 @@ export default function AreasPage() {
               <p style={{ color: '#6b7280', fontSize: '14px', margin: 0 }}>Unidades organizativas de Accusys</p>
             </div>
             {!showForm && (
-              <button onClick={() => setShowForm(true)} style={{ backgroundColor: '#1d4ed8', color: 'white', border: 'none', borderRadius: '10px', padding: '10px 18px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>
+              <button onClick={() => setShowForm(true)} style={{ backgroundColor: '#1a5ce8', color: 'white', border: 'none', borderRadius: '10px', padding: '10px 18px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>
                 + Nueva área
               </button>
             )}
@@ -79,7 +79,7 @@ export default function AreasPage() {
 
           {/* Formulario */}
           {showForm && (
-            <form onSubmit={handleSave} style={{ backgroundColor: '#161b22', border: '1px solid #21262d', borderRadius: '12px', padding: '20px', marginBottom: '20px' }}>
+            <form onSubmit={handleSave} style={{ backgroundColor: '#1a1a1f', border: '1px solid #21262d', borderRadius: '12px', padding: '20px', marginBottom: '20px' }}>
               <h2 style={{ color: 'white', fontSize: '15px', fontWeight: '600', margin: '0 0 16px' }}>{editingId ? 'Editar área' : 'Nueva área'}</h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <div>
@@ -103,7 +103,7 @@ export default function AreasPage() {
               </div>
               <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '16px' }}>
                 <button type="button" onClick={handleCancel} style={{ backgroundColor: 'rgba(255,255,255,0.06)', color: '#9ca3af', border: 'none', borderRadius: '8px', padding: '8px 18px', fontSize: '13px', cursor: 'pointer' }}>Cancelar</button>
-                <button type="submit" disabled={saving} style={{ backgroundColor: '#1d4ed8', color: 'white', border: 'none', borderRadius: '8px', padding: '8px 20px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>{saving ? 'Guardando...' : editingId ? 'Guardar' : 'Crear área'}</button>
+                <button type="submit" disabled={saving} style={{ backgroundColor: '#1a5ce8', color: 'white', border: 'none', borderRadius: '8px', padding: '8px 20px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>{saving ? 'Guardando...' : editingId ? 'Guardar' : 'Crear área'}</button>
               </div>
             </form>
           )}
@@ -116,7 +116,7 @@ export default function AreasPage() {
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {areas.map(area => (
-                <div key={area.id} style={{ backgroundColor: '#161b22', border: '1px solid #21262d', borderRadius: '12px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '14px' }}>
+                <div key={area.id} style={{ backgroundColor: '#1a1a1f', border: '1px solid #21262d', borderRadius: '12px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '14px' }}>
                   <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: area.color + '25', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <div style={{ width: '14px', height: '14px', borderRadius: '50%', backgroundColor: area.color }} />
                   </div>

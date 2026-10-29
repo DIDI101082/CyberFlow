@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import Sidebar from '@/components/layout/Sidebar'
+import Navbar from '@/components/layout/Navbar'
 import { User } from '@/types'
 
 const rolLabel: Record<string, string> = {
@@ -29,9 +29,9 @@ export default function UsersPage() {
   }
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#0d1117', fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif' }}>
-      <Sidebar />
-      <main style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: '#0a0a0f', fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif' }}>
+      <Navbar />
+      <main style={{ padding: '40px 24px', maxWidth: '1200px', margin: '0 auto' }}>
         <div style={{ maxWidth: '900px', margin: '0 auto' }}>
           <div style={{ marginBottom: '28px' }}>
             <h1 style={{ color: 'white', fontSize: '22px', fontWeight: '700', margin: '0 0 4px' }}>Usuarios</h1>
@@ -43,7 +43,7 @@ export default function UsersPage() {
           ) : users.length === 0 ? (
             <p style={{ color: '#6b7280', textAlign: 'center', padding: '60px 0' }}>No hay usuarios</p>
           ) : (
-            <div style={{ backgroundColor: '#161b22', border: '1px solid #21262d', borderRadius: '12px', overflow: 'hidden' }}>
+            <div style={{ backgroundColor: '#1a1a1f', border: '1px solid #21262d', borderRadius: '12px', overflow: 'hidden' }}>
               {users.map((u, i) => {
                 const rs = rolStyle[u.rol] || rolStyle.member
                 return (
@@ -53,7 +53,7 @@ export default function UsersPage() {
                   }}>
                     <div style={{
                       width: '36px', height: '36px', borderRadius: '50%',
-                      backgroundColor: '#1d4ed8', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      backgroundColor: '#1a5ce8', display: 'flex', alignItems: 'center', justifyContent: 'center',
                       color: 'white', fontSize: '14px', fontWeight: '600', flexShrink: 0, marginRight: '14px',
                     }}>
                       {u.nombre?.charAt(0).toUpperCase() || '?'}

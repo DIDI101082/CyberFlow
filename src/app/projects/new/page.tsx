@@ -2,14 +2,14 @@
 
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import Sidebar from '@/components/layout/Sidebar'
+import Navbar from '@/components/layout/Navbar'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Area } from '@/types'
 
 const inputStyle = {
   width: '100%',
-  backgroundColor: '#0d1117',
+  backgroundColor: '#111114',
   border: '1px solid #30363d',
   borderRadius: '8px',
   padding: '10px 14px',
@@ -74,9 +74,9 @@ export default function NewProjectPage() {
   }
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#0d1117', fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif' }}>
-      <Sidebar />
-      <main style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: '#0a0a0f', fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif' }}>
+      <Navbar />
+      <main style={{ padding: '40px 24px', maxWidth: '1200px', margin: '0 auto' }}>
         <div style={{ maxWidth: '640px', margin: '0 auto' }}>
           <Link href="/projects" style={{ color: '#6b7280', fontSize: '13px', textDecoration: 'none', display: 'inline-block', marginBottom: '20px' }}>
             ← Proyectos
@@ -94,7 +94,7 @@ export default function NewProjectPage() {
           )}
 
           <form onSubmit={handleSubmit}>
-            <div style={{ backgroundColor: '#161b22', border: '1px solid #21262d', borderRadius: '12px', padding: '24px', marginBottom: '16px' }}>
+            <div style={{ backgroundColor: '#1a1a1f', border: '1px solid #21262d', borderRadius: '12px', padding: '24px', marginBottom: '16px' }}>
               <h2 style={{ color: 'white', fontSize: '15px', fontWeight: '600', margin: '0 0 20px' }}>Información general</h2>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -157,7 +157,7 @@ export default function NewProjectPage() {
                       type="checkbox"
                       checked={form.es_transversal}
                       onChange={e => set('es_transversal', e.target.checked)}
-                      style={{ width: '16px', height: '16px', accentColor: '#3b82f6', cursor: 'pointer' }}
+                      style={{ width: '16px', height: '16px', accentColor: '#4f8ef7', cursor: 'pointer' }}
                     />
                     <span style={{ color: '#9ca3af', fontSize: '13px' }}>Proyecto transversal (involucra múltiples áreas)</span>
                   </label>
@@ -165,7 +165,7 @@ export default function NewProjectPage() {
               </div>
             </div>
 
-            <div style={{ backgroundColor: '#161b22', border: '1px solid #21262d', borderRadius: '12px', padding: '24px', marginBottom: '24px' }}>
+            <div style={{ backgroundColor: '#1a1a1f', border: '1px solid #21262d', borderRadius: '12px', padding: '24px', marginBottom: '24px' }}>
               <h2 style={{ color: 'white', fontSize: '15px', fontWeight: '600', margin: '0 0 20px' }}>Fechas</h2>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div>
@@ -188,7 +188,7 @@ export default function NewProjectPage() {
               <button
                 type="submit"
                 disabled={saving}
-                style={{ backgroundColor: saving ? '#1e3a8a' : '#1d4ed8', color: 'white', border: 'none', borderRadius: '8px', padding: '10px 24px', fontSize: '14px', fontWeight: '600', cursor: saving ? 'not-allowed' : 'pointer' }}
+                style={{ backgroundColor: saving ? '#1e3a8a' : '#1a5ce8', color: 'white', border: 'none', borderRadius: '8px', padding: '10px 24px', fontSize: '14px', fontWeight: '600', cursor: saving ? 'not-allowed' : 'pointer' }}
               >
                 {saving ? 'Creando...' : 'Crear proyecto'}
               </button>
