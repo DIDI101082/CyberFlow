@@ -196,7 +196,6 @@ export default function ProjectDetailPage() {
     <div style={{ minHeight: '100vh', backgroundColor: '#0a0a0f', fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif' }}>
       <Navbar />
       <main style={{ maxWidth: '1000px', margin: '0 auto', padding: '40px 24px' }}>
-        <div>
 
           <Link href="/projects" style={{ color: '#6b7280', fontSize: '13px', textDecoration: 'none', display: 'inline-block', marginBottom: '20px' }}>
             ← Proyectos
@@ -435,7 +434,6 @@ export default function ProjectDetailPage() {
               </div>
             )}
           </div>
-        </div>
       </main>
 
       {/* ── MODAL ELIMINAR PROYECTO ── */}
@@ -453,9 +451,6 @@ export default function ProjectDetailPage() {
           </div>
         </div>
       )}
-
-      </div>
-      </main>
       <style>{`
         select option { background-color: #111114; color: white; }
         input::placeholder, textarea::placeholder { color: #4b5563; }
