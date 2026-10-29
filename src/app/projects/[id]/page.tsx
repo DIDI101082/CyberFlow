@@ -434,7 +434,6 @@ export default function ProjectDetailPage() {
               </div>
             )}
           </div>
-        </div>
       </main>
 
       {/* ── MODAL ELIMINAR PROYECTO ── */}

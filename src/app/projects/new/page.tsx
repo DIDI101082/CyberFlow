@@ -54,6 +54,7 @@ export default function NewProjectPage() {
     setSaving(true)
     setError(null)
     try {
+      const { data: { user } } = await supabase.auth.getUser()
       const payload: any = {
         nombre: form.nombre.trim(),
         descripcion: form.descripcion.trim() || null,
@@ -63,6 +64,7 @@ export default function NewProjectPage() {
         es_transversal: form.es_transversal,
         fecha_inicio: form.fecha_inicio || null,
         fecha_fin_estimada: form.fecha_fin_estimada || null,
+        ...(user ? { created_by: user.id } : {}),
       }
       const { data, error: err } = await supabase.from('projects').insert([payload]).select().single()
       if (err) throw err
