@@ -6,11 +6,13 @@ import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 
 const navItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: '⊞' },
-  { href: '/projects', label: 'Proyectos', icon: '📁' },
-  { href: '/tasks', label: 'Mis Tareas', icon: '✓' },
-  { href: '/tags', label: 'Etiquetas', icon: '🏷' },
-  { href: '/users', label: 'Usuarios', icon: '👥' },
+  { href: '/dashboard', label: 'Dashboard' },
+  { href: '/portfolio', label: 'Portfolio' },
+  { href: '/projects', label: 'Proyectos' },
+  { href: '/tasks', label: 'Mis Tareas' },
+  { href: '/areas', label: 'Áreas' },
+  { href: '/tags', label: 'Etiquetas' },
+  { href: '/users', label: 'Usuarios' },
 ]
 
 export default function Sidebar() {

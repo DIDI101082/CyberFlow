@@ -35,21 +35,31 @@ export default function DashboardPage() {
 
   useEffect(() => { fetchData() }, [])
 
+  const [allProjects, setAllProjects] = useState<Project[]>([])
+
   const fetchData = async () => {
-    const [{ data: proj }, { data: task }] = await Promise.all([
+    const [{ data: proj }, { data: task }, { data: allProj }] = await Promise.all([
       supabase.from('projects').select('*, area:areas(*)').order('created_at', { ascending: false }).limit(5),
       supabase.from('tasks').select('*, project:projects(nombre)').eq('estado', 'en_curso').limit(5),
+      supabase.from('projects').select('*').in('estado', ['en_curso', 'planificado']),
     ])
     setProjects(proj || [])
     setTasks(task || [])
+    setAllProjects(allProj || [])
     setLoading(false)
   }
 
   const counts = {
-    activos: projects.filter(p => p.estado === 'en_curso').length,
+    activos: allProjects.filter(p => p.estado === 'en_curso').length,
     tareas: tasks.length,
-    planificados: projects.filter(p => p.estado === 'planificado').length,
-    criticos: projects.filter(p => p.prioridad === 'critica').length,
+    planificados: allProjects.filter(p => p.estado === 'planificado').length,
+    criticos: allProjects.filter(p => p.prioridad === 'critica').length,
+  }
+
+  const ragCounts = {
+    verde:    allProjects.filter(p => (p as any).rag_status === 'verde' || !(p as any).rag_status).length,
+    amarillo: allProjects.filter(p => (p as any).rag_status === 'amarillo').length,
+    rojo:     allProjects.filter(p => (p as any).rag_status === 'rojo').length,
   }
 
   return (
@@ -79,6 +89,25 @@ export default function DashboardPage() {
                 </p>
               </div>
             ))}
+          </div>
+
+          {/* RAG Semáforos */}
+          <div style={{ backgroundColor: '#161b22', border: '1px solid #21262d', borderRadius: '12px', padding: '20px', marginBottom: '20px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+              <h2 style={{ color: 'white', fontSize: '15px', fontWeight: '600', margin: 0 }}>Estado del portfolio</h2>
+              <Link href="/portfolio" style={{ color: '#3b82f6', fontSize: '12px', textDecoration: 'none' }}>Ver portfolio →</Link>
+            </div>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              {([['verde','#22c55e','#34d399','En tiempo'],['amarillo','#eab308','#fbbf24','En riesgo'],['rojo','#ef4444','#f87171','Con desvío']] as const).map(([key, dot, color, label]) => (
+                <div key={key} style={{ flex: 1, backgroundColor: '#0d1117', border: `1px solid ${dot}25`, borderRadius: '10px', padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: dot, flexShrink: 0, boxShadow: `0 0 6px ${dot}` }} />
+                  <div>
+                    <p style={{ color: color, fontSize: '22px', fontWeight: '700', margin: '0 0 1px' }}>{loading ? '–' : ragCounts[key as keyof typeof ragCounts]}</p>
+                    <p style={{ color: '#6b7280', fontSize: '11px', margin: 0 }}>{label}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* Two columns */}

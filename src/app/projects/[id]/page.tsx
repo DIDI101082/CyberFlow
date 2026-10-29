@@ -82,6 +82,8 @@ export default function ProjectDetailPage() {
       es_transversal: proj.es_transversal,
       fecha_inicio: proj.fecha_inicio || '',
       fecha_fin_estimada: proj.fecha_fin_estimada || '',
+      rag_status: (proj as any).rag_status || 'verde',
+      rag_nota: (proj as any).rag_nota || '',
     })
     setLoading(false)
   }
@@ -97,6 +99,8 @@ export default function ProjectDetailPage() {
       es_transversal: editForm.es_transversal,
       fecha_inicio: editForm.fecha_inicio || null,
       fecha_fin_estimada: editForm.fecha_fin_estimada || null,
+      rag_status: editForm.rag_status || 'verde',
+      rag_nota: editForm.rag_nota || null,
     }).eq('id', id)
     if (!error) { await fetchAll(); setEditMode(false) }
     setSaving(false)
@@ -225,6 +229,24 @@ export default function ProjectDetailPage() {
                   <div><p style={{ color: '#6b7280', fontSize: '12px', margin: '0 0 2px' }}>Progreso</p><p style={{ color: 'white', fontSize: '13px', margin: 0 }}>{completadas}/{tasks.length} tareas · {progreso}%</p></div>
                 </div>
 
+                {/* RAG Semáforo */}
+                {(() => {
+                  const rag = (project as any).rag_status || 'verde'
+                  const ragCfg: Record<string, { dot: string; color: string; label: string }> = {
+                    verde:    { dot: '#22c55e', color: '#34d399', label: 'En tiempo' },
+                    amarillo: { dot: '#eab308', color: '#fbbf24', label: 'En riesgo' },
+                    rojo:     { dot: '#ef4444', color: '#f87171', label: 'Con desvío' },
+                  }
+                  const r = ragCfg[rag]
+                  return (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '14px', padding: '10px 14px', backgroundColor: r.dot + '10', borderRadius: '8px', border: `1px solid ${r.dot}30` }}>
+                      <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: r.dot, boxShadow: `0 0 6px ${r.dot}` }} />
+                      <span style={{ color: r.color, fontSize: '13px', fontWeight: '600' }}>Semáforo: {r.label}</span>
+                      {(project as any).rag_nota && <span style={{ color: '#6b7280', fontSize: '12px', marginLeft: '8px' }}>— {(project as any).rag_nota}</span>}
+                    </div>
+                  )
+                })()}
+
                 {tasks.length > 0 && (
                   <div style={{ marginTop: '16px', height: '6px', backgroundColor: '#21262d', borderRadius: '3px', overflow: 'hidden' }}>
                     <div style={{ height: '100%', width: `${progreso}%`, backgroundColor: '#3b82f6', borderRadius: '3px' }} />
@@ -279,6 +301,21 @@ export default function ProjectDetailPage() {
                     <input type="checkbox" checked={editForm.es_transversal} onChange={e => setEditForm((p: any) => ({ ...p, es_transversal: e.target.checked }))} style={{ accentColor: '#3b82f6' }} />
                     <span style={{ color: '#9ca3af', fontSize: '13px' }}>Proyecto transversal</span>
                   </label>
+                  {/* RAG */}
+                  <div>
+                    <label style={{ color: '#9ca3af', fontSize: '12px', display: 'block', marginBottom: '8px' }}>Semáforo RAG</label>
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                      {[['verde','#22c55e','En tiempo'],['amarillo','#eab308','En riesgo'],['rojo','#ef4444','Con desvío']].map(([v, dot, lbl]) => (
+                        <button key={v} type="button" onClick={() => setEditForm((p: any) => ({ ...p, rag_status: v }))} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 14px', borderRadius: '20px', border: editForm.rag_status === v ? `2px solid ${dot}` : '2px solid transparent', backgroundColor: editForm.rag_status === v ? dot + '20' : 'rgba(255,255,255,0.04)', color: editForm.rag_status === v ? dot : '#6b7280', fontSize: '12px', cursor: 'pointer' }}>
+                          <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: dot, display: 'inline-block' }} />{lbl}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <label style={{ color: '#9ca3af', fontSize: '12px', display: 'block', marginBottom: '4px' }}>Nota RAG (opcional)</label>
+                    <input type="text" placeholder="Ej: pendiente aprobación cliente" value={editForm.rag_nota} onChange={e => setEditForm((p: any) => ({ ...p, rag_nota: e.target.value }))} style={input} />
+                  </div>
                 </div>
                 <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '20px' }}>
                   <button onClick={() => setEditMode(false)} style={{ backgroundColor: 'rgba(255,255,255,0.06)', color: '#9ca3af', border: 'none', borderRadius: '8px', padding: '8px 18px', fontSize: '13px', cursor: 'pointer' }}>Cancelar</button>
