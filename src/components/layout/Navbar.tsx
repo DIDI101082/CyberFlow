@@ -260,7 +260,6 @@ export default function Navbar() {
                 <Link key={sub.href} href={sub.href} style={{ textDecoration: 'none', flexShrink: 0 }}>
                   <div style={{
                     padding: '4px 14px',
-                    borderRadius: '6px',
                     fontSize: '12.5px',
                     fontWeight: active ? '600' : '400',
                     color: active ? '#4f8ef7' : '#6b7280',
