@@ -1,6 +1,81 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
+// Support multiple AI providers: Gemini (primary), OpenAI (fallback)
+async function callGemini(systemPrompt: string, history: Record<string, string>[], message: string) {
+  const apiKey = process.env.GEMINI_API_KEY
+  if (!apiKey) return null
+
+  const contents = [
+    {
+      role: 'user',
+      parts: [{ text: `INSTRUCCIONES DEL SISTEMA:\n${systemPrompt}\n\n---\nAhora responde al usuario.` }],
+    },
+    {
+      role: 'model',
+      parts: [{ text: 'Entendido. Soy el asistente IA del proyecto. ¿En qué puedo ayudarte?' }],
+    },
+    ...(history || []).slice(-10).flatMap((m) => [
+      {
+        role: m.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: m.content }],
+      },
+    ]),
+    {
+      role: 'user',
+      parts: [{ text: message }],
+    },
+  ]
+
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents,
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 1500,
+        },
+      }),
+    }
+  )
+
+  const data = await res.json()
+
+  if (data.error) {
+    throw new Error(`Gemini: ${data.error.message}`)
+  }
+
+  return data.candidates?.[0]?.content?.parts?.[0]?.text || null
+}
+
+async function callOpenAI(systemPrompt: string, history: Record<string, string>[], message: string) {
+  const apiKey = process.env.OPENAI_API_KEY
+  if (!apiKey) return null
+
+  const messages = [
+    { role: 'system', content: systemPrompt },
+    ...(history || []).slice(-10).map((m) => ({ role: m.role, content: m.content })),
+    { role: 'user', content: message },
+  ]
+
+  const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+    body: JSON.stringify({ model: 'gpt-4o-mini', messages, temperature: 0.7, max_tokens: 1000 }),
+  })
+
+  const data = await res.json()
+
+  if (data.error) {
+    throw new Error(`OpenAI: ${data.error.message}`)
+  }
+
+  return data.choices?.[0]?.message?.content || null
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { projectId, message, history } = await request.json()
@@ -57,30 +132,33 @@ INSTRUCCIONES:
 - Usá formato con viñetas cuando ayude a la claridad
 - Si te preguntan algo que no podés determinar con los datos disponibles, decilo honestamente`
 
-    const apiKey = process.env.OPENAI_API_KEY
-    if (!apiKey) {
-      return NextResponse.json({ response: 'El asistente IA no está configurado. Agregá la OPENAI_API_KEY en las variables de entorno.' })
+    // Try Gemini first, then OpenAI as fallback
+    let response: string | null = null
+    let provider = ''
+
+    try {
+      response = await callGemini(systemPrompt, history || [], message)
+      if (response) provider = 'Gemini'
+    } catch (e) {
+      console.warn('Gemini failed:', e)
     }
 
-    const messages = [
-      { role: 'system', content: systemPrompt },
-      ...(history || []).slice(-10).map((m: Record<string, string>) => ({ role: m.role, content: m.content })),
-      { role: 'user', content: message },
-    ]
-
-    const openaiRes = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-      body: JSON.stringify({ model: 'gpt-4o-mini', messages, temperature: 0.7, max_tokens: 1000 }),
-    })
-
-    const data = await openaiRes.json()
-
-    if (data.error) {
-      return NextResponse.json({ response: `Error de IA: ${data.error.message}` })
+    if (!response) {
+      try {
+        response = await callOpenAI(systemPrompt, history || [], message)
+        if (response) provider = 'OpenAI'
+      } catch (e) {
+        console.warn('OpenAI failed:', e)
+      }
     }
 
-    return NextResponse.json({ response: data.choices?.[0]?.message?.content || 'Sin respuesta.' })
+    if (!response) {
+      return NextResponse.json({
+        response: 'No hay ningún proveedor de IA configurado. Agregá GEMINI_API_KEY o OPENAI_API_KEY en las variables de entorno de Vercel.',
+      })
+    }
+
+    return NextResponse.json({ response, provider })
   } catch (error) {
     console.error('AI Chat error:', error)
     return NextResponse.json({ response: 'Error interno del asistente.' }, { status: 500 })
