@@ -1,14 +1,15 @@
 'use client'
 
 import { useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
+import { createClient } from '@/lib/supabase/client'
 
 export default function LoginPage() {
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const router = useRouter()
   const supabase = createClient()
 
@@ -16,131 +17,228 @@ export default function LoginPage() {
     e.preventDefault()
     setLoading(true)
     setError(null)
-    try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password })
-      if (error) throw error
-      router.push('/dashboard')
-    } catch (err: any) {
-      setError(err.message || 'Error al iniciar sesión')
-    } finally {
+
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
+
+    if (error) {
+      setError('Credenciales inválidas. Verificá tu email y contraseña.')
       setLoading(false)
+    } else {
+      router.push('/dashboard')
     }
   }
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #1a3a8f 0%, #1e4db7 50%, #1a3a8f 100%)',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-    }}>
-      {/* Card */}
-      <div style={{
-        background: 'rgba(255,255,255,0.08)',
-        backdropFilter: 'blur(20px)',
-        border: '1px solid rgba(255,255,255,0.15)',
-        borderRadius: '20px',
-        padding: '48px 40px',
-        width: '100%',
-        maxWidth: '440px',
-        textAlign: 'center',
-      }}>
-        {/* Logo */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '16px',
-          marginBottom: '32px',
-        }}>
-          <svg width="130" height="32" viewBox="0 0 130 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <text x="0" y="26" fontFamily="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" fontWeight="700" fontSize="26" fill="white" letterSpacing="-0.5">
-              <tspan fontStyle="italic">/</tspan>accusys
-            </text>
-          </svg>
-          <div style={{ width: '1px', height: '32px', background: 'rgba(255,255,255,0.4)' }} />
-          <span style={{ color: 'white', fontWeight: '700', fontSize: '22px', letterSpacing: '0.5px' }}>
-            CyberFlow
-          </span>
+    <div
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'linear-gradient(135deg, #0f2461 0%, #1a3a8f 40%, #1e4db7 70%, #0f2461 100%)',
+        fontFamily: "'Segoe UI', system-ui, -apple-system, sans-serif",
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
+      {/* Círculos decorativos de fondo */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '-120px',
+          right: '-120px',
+          width: '400px',
+          height: '400px',
+          borderRadius: '50%',
+          background: 'rgba(255,255,255,0.04)',
+          pointerEvents: 'none',
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          bottom: '-80px',
+          left: '-80px',
+          width: '300px',
+          height: '300px',
+          borderRadius: '50%',
+          background: 'rgba(255,255,255,0.04)',
+          pointerEvents: 'none',
+        }}
+      />
+
+      {/* Card glassmorphism */}
+      <div
+        style={{
+          background: 'rgba(255,255,255,0.08)',
+          backdropFilter: 'blur(24px)',
+          WebkitBackdropFilter: 'blur(24px)',
+          border: '1px solid rgba(255,255,255,0.15)',
+          borderRadius: '16px',
+          padding: '48px 44px',
+          width: '100%',
+          maxWidth: '420px',
+          boxShadow: '0 20px 60px rgba(0,0,0,0.35)',
+          position: 'relative',
+          zIndex: 1,
+        }}
+      >
+        {/* Logo + nombre del producto */}
+        <div style={{ textAlign: 'center', marginBottom: '36px' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '14px',
+              marginBottom: '8px',
+            }}
+          >
+            {/* Logo Accusys real */}
+            <Image
+              src="/accusys-logo.png"
+              alt="Accusys"
+              width={140}
+              height={40}
+              style={{ objectFit: 'contain', filter: 'brightness(0) invert(1)' }}
+              priority
+            />
+            {/* Separador vertical */}
+            <div
+              style={{
+                width: '1px',
+                height: '36px',
+                background: 'rgba(255,255,255,0.4)',
+              }}
+            />
+            {/* Nombre del producto */}
+            <span
+              style={{
+                color: '#ffffff',
+                fontSize: '20px',
+                fontWeight: '300',
+                letterSpacing: '0.5px',
+              }}
+            >
+              CyberFlow
+            </span>
+          </div>
+          <p
+            style={{
+              color: 'rgba(255,255,255,0.55)',
+              fontSize: '13px',
+              marginTop: '12px',
+            }}
+          >
+            Gestión de proyectos de ciberseguridad
+          </p>
         </div>
 
-        {/* Title */}
-        <h1 style={{ color: 'white', fontWeight: '700', fontSize: '24px', margin: '0 0 8px' }}>
-          Bienvenido
-        </h1>
-        <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '15px', margin: '0 0 28px' }}>
-          Ingresá con tu cuenta de la empresa
-        </p>
-
-        {/* Error */}
-        {error && (
-          <div style={{
-            background: 'rgba(255,255,255,0.15)',
-            border: '1px solid rgba(255,255,255,0.2)',
-            borderRadius: '10px',
-            padding: '12px 16px',
-            marginBottom: '20px',
-            color: 'white',
-            fontSize: '14px',
-          }}>
-            {error}
+        {/* Formulario */}
+        <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div>
+            <label
+              htmlFor="email"
+              style={{
+                display: 'block',
+                color: 'rgba(255,255,255,0.75)',
+                fontSize: '13px',
+                marginBottom: '6px',
+                fontWeight: '500',
+              }}
+            >
+              Correo electrónico
+            </label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              placeholder="usuario@accusys.com.ar"
+              style={{
+                width: '100%',
+                padding: '11px 14px',
+                background: 'rgba(255,255,255,0.1)',
+                border: '1px solid rgba(255,255,255,0.2)',
+                borderRadius: '8px',
+                color: '#ffffff',
+                fontSize: '14px',
+                outline: 'none',
+                boxSizing: 'border-box',
+                transition: 'border-color 0.2s',
+              }}
+              onFocus={(e) => (e.target.style.borderColor = 'rgba(255,255,255,0.5)')}
+              onBlur={(e) => (e.target.style.borderColor = 'rgba(255,255,255,0.2)')}
+            />
           </div>
-        )}
 
-        {/* Form */}
-        <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px' }}>
-          <input
-            type="email"
-            placeholder="Email corporativo"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            required
-            style={{
-              width: '100%',
-              padding: '14px 16px',
-              borderRadius: '10px',
-              border: '1px solid rgba(255,255,255,0.2)',
-              background: 'rgba(255,255,255,0.1)',
-              color: 'white',
-              fontSize: '15px',
-              outline: 'none',
-              boxSizing: 'border-box',
-            }}
-          />
-          <input
-            type="password"
-            placeholder="Contraseña"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            required
-            style={{
-              width: '100%',
-              padding: '14px 16px',
-              borderRadius: '10px',
-              border: '1px solid rgba(255,255,255,0.2)',
-              background: 'rgba(255,255,255,0.1)',
-              color: 'white',
-              fontSize: '15px',
-              outline: 'none',
-              boxSizing: 'border-box',
-            }}
-          />
+          <div>
+            <label
+              htmlFor="password"
+              style={{
+                display: 'block',
+                color: 'rgba(255,255,255,0.75)',
+                fontSize: '13px',
+                marginBottom: '6px',
+                fontWeight: '500',
+              }}
+            >
+              Contraseña
+            </label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              placeholder="••••••••"
+              style={{
+                width: '100%',
+                padding: '11px 14px',
+                background: 'rgba(255,255,255,0.1)',
+                border: '1px solid rgba(255,255,255,0.2)',
+                borderRadius: '8px',
+                color: '#ffffff',
+                fontSize: '14px',
+                outline: 'none',
+                boxSizing: 'border-box',
+                transition: 'border-color 0.2s',
+              }}
+              onFocus={(e) => (e.target.style.borderColor = 'rgba(255,255,255,0.5)')}
+              onBlur={(e) => (e.target.style.borderColor = 'rgba(255,255,255,0.2)')}
+            />
+          </div>
+
+          {error && (
+            <div
+              style={{
+                background: 'rgba(239,68,68,0.15)',
+                border: '1px solid rgba(239,68,68,0.3)',
+                borderRadius: '8px',
+                padding: '10px 14px',
+                color: '#fca5a5',
+                fontSize: '13px',
+              }}
+            >
+              {error}
+            </div>
+          )}
+
           <button
             type="submit"
             disabled={loading}
             style={{
               width: '100%',
-              padding: '14px',
-              borderRadius: '10px',
+              padding: '12px',
+              background: loading ? 'rgba(255,255,255,0.15)' : '#ffffff',
+              color: loading ? 'rgba(255,255,255,0.5)' : '#1a3a8f',
               border: 'none',
-              background: loading ? 'rgba(255,255,255,0.5)' : 'white',
-              color: '#1a3a8f',
+              borderRadius: '8px',
+              fontSize: '14px',
               fontWeight: '600',
-              fontSize: '15px',
               cursor: loading ? 'not-allowed' : 'pointer',
+              transition: 'all 0.2s',
               marginTop: '4px',
             }}
           >
@@ -148,62 +246,62 @@ export default function LoginPage() {
           </button>
         </form>
 
-        {/* Divider */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px',
-          marginBottom: '20px',
-        }}>
-          <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.2)' }} />
-          <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px' }}>o</span>
-          <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.2)' }} />
+        {/* Divisor */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            margin: '24px 0',
+          }}
+        >
+          <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.15)' }} />
+          <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px' }}>o</span>
+          <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.15)' }} />
         </div>
 
-        {/* Microsoft Button (preparado para Entra ID) */}
+        {/* Botón Microsoft (preparado para Entra ID) */}
         <button
           disabled
-          title="Próximamente: login con cuenta Microsoft"
+          title="Próximamente disponible"
           style={{
             width: '100%',
-            padding: '14px',
-            borderRadius: '10px',
-            border: 'none',
-            background: 'rgba(255,255,255,0.6)',
-            color: '#333',
-            fontWeight: '600',
-            fontSize: '15px',
+            padding: '11px',
+            background: 'rgba(255,255,255,0.06)',
+            border: '1px solid rgba(255,255,255,0.15)',
+            borderRadius: '8px',
+            color: 'rgba(255,255,255,0.4)',
+            fontSize: '14px',
+            fontWeight: '500',
             cursor: 'not-allowed',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '12px',
-            opacity: 0.7,
+            gap: '10px',
           }}
         >
-          {/* Microsoft logo SVG */}
-          <svg width="20" height="20" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="1" y="1" width="9" height="9" fill="#F25022"/>
-            <rect x="11" y="1" width="9" height="9" fill="#7FBA00"/>
-            <rect x="1" y="11" width="9" height="9" fill="#00A4EF"/>
-            <rect x="11" y="11" width="9" height="9" fill="#FFB900"/>
+          {/* Logo Microsoft SVG */}
+          <svg width="18" height="18" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="1" y="1" width="9" height="9" fill="#f25022" opacity="0.5" />
+            <rect x="11" y="1" width="9" height="9" fill="#7fba00" opacity="0.5" />
+            <rect x="1" y="11" width="9" height="9" fill="#00a4ef" opacity="0.5" />
+            <rect x="11" y="11" width="9" height="9" fill="#ffb900" opacity="0.5" />
           </svg>
-          Continuar con Microsoft
+          Continuar con Microsoft (próximamente)
         </button>
 
-        <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', marginTop: '12px' }}>
-          Próximamente: acceso con <strong style={{ color: 'rgba(255,255,255,0.7)' }}>Microsoft 365</strong>
+        {/* Footer */}
+        <p
+          style={{
+            textAlign: 'center',
+            color: 'rgba(255,255,255,0.3)',
+            fontSize: '11px',
+            marginTop: '28px',
+          }}
+        >
+          © {new Date().getFullYear()} Accusys Technology · Todos los derechos reservados
         </p>
       </div>
-
-      {/* Footer */}
-      <p style={{
-        color: 'rgba(255,255,255,0.4)',
-        fontSize: '13px',
-        marginTop: '32px',
-      }}>
-        © 2026 Accusys. Todos los derechos reservados.
-      </p>
     </div>
   )
 }
