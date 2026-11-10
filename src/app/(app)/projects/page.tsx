@@ -44,8 +44,8 @@ export default async function ProjectsPage() {
       ) : (
         <div className="grid gap-4">
           {allProjects.map((project) => {
-            const statusCfg = projectStatusConfig[project.status as keyof typeof projectStatusConfig]
-            const priorityCfg = priorityConfig[project.priority as keyof typeof priorityConfig]
+            const statusCfg = projectStatusConfig[project.status as keyof typeof projectStatusConfig] || projectStatusConfig.draft
+            const priorityCfg = priorityConfig[project.priority as keyof typeof priorityConfig] || priorityConfig.medium
             return (
               <Link
                 key={project.id}
@@ -86,13 +86,13 @@ export default async function ProjectsPage() {
 
                   <div className="flex items-center gap-3 ml-4">
                     <div className="text-right">
-                      <p className="text-xl font-bold text-surface-900">{project.progress}%</p>
+                      <p className="text-xl font-bold text-surface-900">{project.progress || 0}%</p>
                       <p className="text-xs text-surface-400">progreso</p>
                     </div>
                     <div className="w-2 h-16 rounded-full bg-surface-100 overflow-hidden">
                       <div
                         className="w-full rounded-full bg-brand-500 transition-all"
-                        style={{ height: `${project.progress}%` }}
+                        style={{ height: `${project.progress || 0}%` }}
                       />
                     </div>
                   </div>
