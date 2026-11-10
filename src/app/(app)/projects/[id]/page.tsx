@@ -64,8 +64,8 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
   const overdueTasks = [...allTasks, ...orphanTasks].filter((t: any) => t.due_date && isOverdue(t.due_date) && t.status !== 'completed').length
   const blockedTasks = [...allTasks, ...orphanTasks].filter((t: any) => t.status === 'blocked').length
 
-  const statusCfg = projectStatusConfig[project.status as keyof typeof projectStatusConfig]
-  const priorityCfg = priorityConfig[project.priority as keyof typeof priorityConfig]
+  const statusCfg = projectStatusConfig[project.status as keyof typeof projectStatusConfig] || projectStatusConfig.draft
+  const priorityCfg = priorityConfig[project.priority as keyof typeof priorityConfig] || priorityConfig.medium
 
   return (
     <div className="space-y-8">
@@ -321,3 +321,4 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
     </div>
   )
 }
+
