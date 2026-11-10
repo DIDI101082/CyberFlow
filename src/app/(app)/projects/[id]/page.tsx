@@ -11,6 +11,12 @@ import {
   Target,
   ShieldAlert,
   Sparkles,
+  Columns3,
+  FolderOpen,
+  Bot,
+  GanttChart,
+  FileDown,
+  History,
 } from 'lucide-react'
 import {
   projectStatusConfig,
@@ -24,6 +30,7 @@ import {
 } from '@/lib/utils'
 import GenerateReportButton from '@/components/project/GenerateReportButton'
 import TaskList from '@/components/project/TaskList'
+import AISuggestions from '@/components/projects/AISuggestions'
 
 export default async function ProjectDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -150,6 +157,37 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
           <span>{formatDate(project.end_date)}</span>
         </div>
       </div>
+
+      {/* Quick Actions */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <Link href={`/projects/${id}/kanban`} className="card !p-3 flex items-center gap-2 hover:border-brand-300 transition-colors group">
+          <Columns3 className="w-5 h-5 text-blue-500 group-hover:scale-110 transition-transform" />
+          <span className="text-sm font-medium text-surface-700">Kanban</span>
+        </Link>
+        <Link href={`/projects/${id}/gantt`} className="card !p-3 flex items-center gap-2 hover:border-brand-300 transition-colors group">
+          <GanttChart className="w-5 h-5 text-indigo-500 group-hover:scale-110 transition-transform" />
+          <span className="text-sm font-medium text-surface-700">Gantt</span>
+        </Link>
+        <Link href={`/projects/${id}/files`} className="card !p-3 flex items-center gap-2 hover:border-brand-300 transition-colors group">
+          <FolderOpen className="w-5 h-5 text-amber-500 group-hover:scale-110 transition-transform" />
+          <span className="text-sm font-medium text-surface-700">Archivos</span>
+        </Link>
+        <Link href={`/projects/${id}/chat`} className="card !p-3 flex items-center gap-2 hover:border-brand-300 transition-colors group">
+          <Bot className="w-5 h-5 text-purple-500 group-hover:scale-110 transition-transform" />
+          <span className="text-sm font-medium text-surface-700">Chat IA</span>
+        </Link>
+        <a href={`/api/reports/export?projectId=${id}&format=html`} target="_blank" className="card !p-3 flex items-center gap-2 hover:border-brand-300 transition-colors group">
+          <FileDown className="w-5 h-5 text-green-500 group-hover:scale-110 transition-transform" />
+          <span className="text-sm font-medium text-surface-700">Reporte</span>
+        </a>
+        <a href={`/api/reports/export?projectId=${id}&format=csv`} className="card !p-3 flex items-center gap-2 hover:border-brand-300 transition-colors group">
+          <History className="w-5 h-5 text-teal-500 group-hover:scale-110 transition-transform" />
+          <span className="text-sm font-medium text-surface-700">CSV</span>
+        </a>
+      </div>
+
+      {/* AI Suggestions */}
+      <AISuggestions projectId={id} />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Milestones & Tasks */}
