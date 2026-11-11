@@ -7,11 +7,58 @@ import ProjectHistoryToggle from '@/components/project/ProjectHistoryToggle'
 export default async function ProjectsPage() {
   const supabase = await createClient()
 
-  const { data: projects } = await supabase
+  // Obtener perfil del usuario actual
+  const { data: { user } } = await supabase.auth.getUser()
+  const { data: currentProfile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user!.id)
+    .single()
+
+  const isAdminOrLead = currentProfile?.role === 'admin' || currentProfile?.role === 'area_lead'
+
+  let projectsQuery = supabase
     .from('projects')
     .select('*, area:areas(name), owner:profiles(full_name), project_members(count)')
     .order('updated_at', { ascending: false })
 
+  // Members solo ven proyectos donde están asignados (como owner o como miembro)
+  if (!isAdminOrLead) {
+    const { data: memberProjects } = await supabase
+      .from('project_members')
+      .select('project_id')
+      .eq('user_id', user!.id)
+
+    const assignedIds = (memberProjects || []).map((m: any) => m.project_id)
+    // También incluir proyectos donde es owner
+    const { data: ownedProjects } = await supabase
+      .from('projects')
+      .select('id')
+      .eq('owner_id', user!.id)
+    const ownedIds = (ownedProjects || []).map((p: any) => p.id)
+
+    const allIds = [...new Set([...assignedIds, ...ownedIds])]
+
+    if (allIds.length === 0) {
+      return (
+        <div className="space-y-6">
+          <div>
+            <h1 className="text-2xl font-bold text-surface-900">Proyectos</h1>
+            <p className="text-surface-500 mt-1">Proyectos asignados a vos</p>
+          </div>
+          <div className="card text-center py-16">
+            <FolderKanban className="w-12 h-12 mx-auto mb-3 text-surface-300" />
+            <h3 className="text-lg font-medium text-surface-700">No tenés proyectos asignados</h3>
+            <p className="text-surface-500 mt-1">Un administrador puede asignarte a un proyecto</p>
+          </div>
+        </div>
+      )
+    }
+
+    projectsQuery = projectsQuery.in('id', allIds)
+  }
+
+  const { data: projects } = await projectsQuery
   const allProjects = (projects || []) as any[]
 
   // Separar activos de finalizados/cancelados
@@ -32,12 +79,14 @@ export default async function ProjectsPage() {
             {activeProjects.length} activos · {historyProjects.length} finalizados
           </p>
         </div>
-        <div className="flex gap-3">
-          <Link href="/projects/new" className="btn-primary">
-            <Wand2 className="w-4 h-4" />
-            Nuevo con IA
-          </Link>
-        </div>
+        {isAdminOrLead && (
+          <div className="flex gap-3">
+            <Link href="/projects/new" className="btn-primary">
+              <Wand2 className="w-4 h-4" />
+              Nuevo con IA
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* Proyectos Activos */}
