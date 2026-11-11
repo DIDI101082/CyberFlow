@@ -1,7 +1,20 @@
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
 import { ArrowLeft, Wand2, ClipboardEdit, Sparkles, FileEdit } from 'lucide-react'
 
-export default function NewProjectChoice() {
+export default async function NewProjectChoice() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user!.id)
+    .single()
+
+  if (profile?.role === 'member') {
+    redirect('/projects')
+  }
   return (
     <div className="max-w-3xl mx-auto space-y-8">
       {/* Header */}
