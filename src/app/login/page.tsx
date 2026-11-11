@@ -260,34 +260,51 @@ export default function LoginPage() {
           <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.15)' }} />
         </div>
 
-        {/* Botón Microsoft (preparado para Entra ID) */}
+        {/* Botón Microsoft Entra ID */}
         <button
-          disabled
-          title="Próximamente disponible"
+          onClick={async () => {
+            setLoading(true)
+            setError(null)
+            const { error } = await supabase.auth.signInWithOAuth({
+              provider: 'azure',
+              options: {
+                scopes: 'email profile openid',
+                redirectTo: `${window.location.origin}/auth/callback`,
+              },
+            })
+            if (error) {
+              setError('Error al conectar con Microsoft. Intentá de nuevo.')
+              setLoading(false)
+            }
+          }}
+          disabled={loading}
           style={{
             width: '100%',
             padding: '11px',
-            background: 'rgba(255,255,255,0.06)',
-            border: '1px solid rgba(255,255,255,0.15)',
+            background: loading ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.1)',
+            border: '1px solid rgba(255,255,255,0.2)',
             borderRadius: '8px',
-            color: 'rgba(255,255,255,0.4)',
+            color: loading ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.9)',
             fontSize: '14px',
             fontWeight: '500',
-            cursor: 'not-allowed',
+            cursor: loading ? 'not-allowed' : 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             gap: '10px',
+            transition: 'all 0.2s',
           }}
+          onMouseEnter={(e) => { if (!loading) e.currentTarget.style.background = 'rgba(255,255,255,0.18)' }}
+          onMouseLeave={(e) => { if (!loading) e.currentTarget.style.background = 'rgba(255,255,255,0.1)' }}
         >
           {/* Logo Microsoft SVG */}
           <svg width="18" height="18" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="1" y="1" width="9" height="9" fill="#f25022" opacity="0.5" />
-            <rect x="11" y="1" width="9" height="9" fill="#7fba00" opacity="0.5" />
-            <rect x="1" y="11" width="9" height="9" fill="#00a4ef" opacity="0.5" />
-            <rect x="11" y="11" width="9" height="9" fill="#ffb900" opacity="0.5" />
+            <rect x="1" y="1" width="9" height="9" fill="#f25022" />
+            <rect x="11" y="1" width="9" height="9" fill="#7fba00" />
+            <rect x="1" y="11" width="9" height="9" fill="#00a4ef" />
+            <rect x="11" y="11" width="9" height="9" fill="#ffb900" />
           </svg>
-          Continuar con Microsoft (próximamente)
+          {loading ? 'Conectando...' : 'Continuar con Microsoft'}
         </button>
 
         {/* Footer */}
