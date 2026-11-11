@@ -1,22 +1,36 @@
 import { createClient } from '@/lib/supabase/server'
-import { Users, Shield, UserCog, User } from 'lucide-react'
-import { cn } from '@/lib/utils'
-
-const roleConfig = {
-  admin:     { label: 'Administrador', icon: Shield, color: 'text-red-700', bg: 'bg-red-50' },
-  area_lead: { label: 'Líder de Área', icon: UserCog, color: 'text-brand-700', bg: 'bg-brand-50' },
-  member:    { label: 'Miembro', icon: User, color: 'text-surface-600', bg: 'bg-surface-100' },
-}
+import { Users } from 'lucide-react'
+import TeamMemberCard from '@/components/team/TeamMemberCard'
 
 export default async function TeamPage() {
   const supabase = await createClient()
 
+  // Obtener usuario actual
+  const { data: { user } } = await supabase.auth.getUser()
+
+  // Obtener perfil del usuario actual para saber si es admin
+  const { data: currentProfile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user?.id || '')
+    .single()
+
+  const isAdmin = currentProfile?.role === 'admin'
+
+  // Obtener todos los miembros
   const { data: members } = await supabase
     .from('profiles')
     .select('*, area:areas(name)')
     .order('full_name')
 
+  // Obtener áreas disponibles (para el dropdown)
+  const { data: areas } = await supabase
+    .from('areas')
+    .select('id, name')
+    .order('name')
+
   const allMembers = members || []
+  const allAreas = areas || []
 
   return (
     <div className="space-y-6">
@@ -26,32 +40,15 @@ export default async function TeamPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {allMembers.map((member: any) => {
-          const role = roleConfig[member.role as keyof typeof roleConfig] || roleConfig.member
-          const Icon = role.icon
-          return (
-            <div key={member.id} className="card">
-              <div className="flex items-start gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-brand-100 text-lg font-bold text-brand-700">
-                  {member.full_name?.charAt(0).toUpperCase() || '?'}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <h3 className="font-semibold text-surface-900">{member.full_name}</h3>
-                  <p className="text-sm text-surface-500">{member.email}</p>
-                  <div className="flex items-center gap-2 mt-2">
-                    <span className={`badge ${role.bg} ${role.color}`}>
-                      <Icon className="w-3 h-3 mr-1" />
-                      {role.label}
-                    </span>
-                    {member.area?.name && (
-                      <span className="badge bg-surface-100 text-surface-600">{member.area.name}</span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )
-        })}
+        {allMembers.map((member: any) => (
+          <TeamMemberCard
+            key={member.id}
+            member={member}
+            areas={allAreas}
+            isCurrentUserAdmin={isAdmin}
+            currentUserId={user?.id || ''}
+          />
+        ))}
       </div>
     </div>
   )
