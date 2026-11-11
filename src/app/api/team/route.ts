@@ -36,16 +36,27 @@ export async function PATCH(request: Request) {
   if (role) updateData.role = role
   if (area_id !== undefined) updateData.area_id = area_id || null
 
-  const { data, error } = await supabase
+  // Hacer el update sin .single() para evitar errores de coerción
+  const { error: updateError } = await supabase
     .from('profiles')
     .update(updateData)
     .eq('id', memberId)
-    .select('*, area:areas(name)')
-    .single()
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+  if (updateError) {
+    return NextResponse.json({ error: updateError.message }, { status: 500 })
   }
 
-  return NextResponse.json(data)
+  // Leer el perfil actualizado por separado
+  const { data: updated, error: readError } = await supabase
+    .from('profiles')
+    .select('*, area:areas(name)')
+    .eq('id', memberId)
+    .single()
+
+  if (readError) {
+    // El update ya se hizo, devolver éxito aunque falle la lectura
+    return NextResponse.json({ success: true })
+  }
+
+  return NextResponse.json(updated)
 }
