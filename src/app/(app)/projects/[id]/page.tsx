@@ -31,6 +31,7 @@ import {
 import GenerateReportButton from '@/components/project/GenerateReportButton'
 import TaskList from '@/components/project/TaskList'
 import AISuggestions from '@/components/projects/AISuggestions'
+import ProjectMembers from '@/components/project/ProjectMembers'
 
 export default async function ProjectDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -266,26 +267,10 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
           </div>
 
           {/* Miembros */}
-          <div className="card space-y-3">
-            <h3 className="font-semibold text-surface-900">Equipo</h3>
-            {project.project_members?.length > 0 ? (
-              <div className="space-y-2">
-                {project.project_members.map((member: any) => (
-                  <div key={member.id} className="flex items-center gap-2">
-                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-100 text-xs font-semibold text-brand-700">
-                      {member.profile?.full_name?.charAt(0) || '?'}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-surface-800 truncate">{member.profile?.full_name}</p>
-                    </div>
-                    <span className="text-xs text-surface-400">{member.role}</span>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-surface-400">Sin miembros asignados</p>
-            )}
-          </div>
+          <ProjectMembers
+            projectId={project.id}
+            initialMembers={project.project_members || []}
+          />
 
           {/* Riesgos */}
           <div className="card space-y-3">
