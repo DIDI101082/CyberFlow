@@ -25,7 +25,7 @@ const categories = [
 
 const statusOptions: { value: ProjectStatus; label: string }[] = [
   { value: 'planning', label: '📋 Planificación' },
-  { value: 'active', label: '▶️ Activo' },
+  { value: 'in_progress', label: '▶️ Activo' },
   { value: 'on_hold', label: '⏸️ En pausa' },
   { value: 'completed', label: '✅ Completado' },
 ]
