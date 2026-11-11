@@ -8,6 +8,9 @@ import {
   Save,
   Loader2,
   Calendar,
+  Users,
+  X,
+  UserPlus,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Area, TaskPriority, ProjectStatus } from '@/lib/types'
@@ -37,6 +40,7 @@ export default function NewProjectManual() {
   const [members, setMembers] = useState<{ id: string; full_name: string; email: string }[]>([])
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [selectedMembers, setSelectedMembers] = useState<string[]>([])
 
   const [form, setForm] = useState({
     name: '',
@@ -52,12 +56,19 @@ export default function NewProjectManual() {
   })
 
   useEffect(() => {
-    supabase.from('areas').select('*').then(({ data }) => {
-      if (data) setAreas(data)
-    })
-    supabase.from('profiles').select('id, full_name, email').then(({ data }) => {
-      if (data) setMembers(data)
-    })
+    async function loadData() {
+      // Esperar sesión activa antes de hacer queries
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) return
+
+      const [areasRes, membersRes] = await Promise.all([
+        supabase.from('areas').select('*'),
+        supabase.from('profiles').select('id, full_name, email').order('full_name'),
+      ])
+      if (areasRes.data) setAreas(areasRes.data)
+      if (membersRes.data) setMembers(membersRes.data)
+    }
+    loadData()
   }, [])
 
   function updateForm(field: string, value: any) {
@@ -108,6 +119,20 @@ export default function NewProjectManual() {
         user_id: user.id,
         role: 'lead',
       })
+
+      // Agregar miembros seleccionados
+      if (selectedMembers.length > 0) {
+        const memberInserts = selectedMembers
+          .filter((id) => id !== user.id) // no duplicar el owner
+          .map((memberId) => ({
+            project_id: project.id,
+            user_id: memberId,
+            role: 'member' as const,
+          }))
+        if (memberInserts.length > 0) {
+          await supabase.from('project_members').insert(memberInserts)
+        }
+      }
 
       // Log de actividad
       await supabase.from('activity_log').insert({
@@ -298,6 +323,66 @@ export default function NewProjectManual() {
                 onChange={(e) => updateForm('end_date', e.target.value)}
               />
             </div>
+          </div>
+        </div>
+
+        {/* Miembros del equipo */}
+        <div className="card space-y-5">
+          <h2 className="text-lg font-semibold text-surface-900 flex items-center gap-2">
+            <Users className="w-5 h-5 text-surface-400" />
+            Asignar Miembros
+          </h2>
+          <p className="text-sm text-surface-500 -mt-2">Seleccioná las personas que van a trabajar en este proyecto (vos ya quedás como líder)</p>
+
+          {/* Miembros seleccionados */}
+          {selectedMembers.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {selectedMembers.map((id) => {
+                const member = members.find((m) => m.id === id)
+                if (!member) return null
+                return (
+                  <span
+                    key={id}
+                    className="inline-flex items-center gap-1 rounded-full bg-brand-50 border border-brand-200 px-3 py-1 text-sm text-brand-700"
+                  >
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-brand-200 text-xs font-bold text-brand-700">
+                      {member.full_name?.charAt(0) || member.email.charAt(0)}
+                    </span>
+                    {member.full_name || member.email}
+                    <button
+                      type="button"
+                      onClick={() => setSelectedMembers((prev) => prev.filter((m) => m !== id))}
+                      className="ml-1 text-brand-400 hover:text-brand-700"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                )
+              })}
+            </div>
+          )}
+
+          {/* Selector */}
+          <div className="flex gap-2">
+            <select
+              className="input flex-1"
+              value=""
+              onChange={(e) => {
+                if (e.target.value && !selectedMembers.includes(e.target.value)) {
+                  setSelectedMembers((prev) => [...prev, e.target.value])
+                }
+                e.target.value = ''
+              }}
+            >
+              <option value="">Agregar miembro...</option>
+              {members
+                .filter((m) => !selectedMembers.includes(m.id))
+                .map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.full_name || m.email}
+                  </option>
+                ))}
+            </select>
           </div>
         </div>
 
