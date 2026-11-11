@@ -28,6 +28,11 @@ export default function SettingsPage() {
         .single()
 
       if (profile) {
+        // Redirigir si no es admin
+        if (profile.role !== 'admin') {
+          router.replace('/dashboard')
+          return
+        }
         setProfile(profile)
         setFullName(profile.full_name)
         setAreaId(profile.area_id || '')
