@@ -14,7 +14,6 @@ export default async function TeamPage() {
   const { data: members } = await supabase
     .from('profiles')
     .select('*, area:areas(name)')
-    .eq('is_active', true)
     .order('full_name')
 
   const allMembers = members || []
