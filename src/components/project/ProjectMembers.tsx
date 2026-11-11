@@ -52,7 +52,6 @@ export default function ProjectMembers({
       const { data } = await supabase
         .from('profiles')
         .select('id, full_name, email, role')
-        .eq('is_active', true)
         .order('full_name')
 
       if (data) {
