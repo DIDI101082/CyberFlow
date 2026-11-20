@@ -30,7 +30,8 @@ export default async function DashboardPage() {
     supabase.from('tasks').select('*, project:projects(name)'),
     supabase.from('activity_log').select('*, project:projects(name)').order('created_at', { ascending: false }).limit(10),
     supabase.from('profiles').select('full_name, role').eq('id', user.id).single(),
-    supabase.from('project_members').select('*, profile:profiles(full_name, email), project:projects(id, name, status, progress)'),
+    // Admin: trae todos los miembros de todos los proyectos para ver el panel del equipo
+    supabase.from('project_members').select('*, profile:profiles(full_name, email), project:projects(id, name, status, progress, owner_id)'),
     supabase.from('project_members').select('project_id').eq('user_id', user.id),
     supabase.from('projects').select('id').eq('owner_id', user.id),
   ])
@@ -80,58 +81,42 @@ export default async function DashboardPage() {
     progress: p.progress || 0,
   }))
 
-  // Agrupar proyectos por miembro
+  // Agrupar proyectos por miembro (solo visible para admin)
   const memberMap = new Map<string, {
     name: string
     email: string
     projects: { id: string; name: string; status: string; progress: number }[]
   }>()
 
-  // Agregar proyectos desde project_members
-  for (const pm of (projectMembers || [])) {
-    if (!pm.profile || !pm.project) continue
-    const key = pm.profile.email
-    if (!memberMap.has(key)) {
-      memberMap.set(key, {
-        name: pm.profile.full_name || pm.profile.email,
-        email: pm.profile.email,
+  if (isAdmin) {
+    // Cargar todos los perfiles del equipo para mostrarlos aunque no tengan proyectos
+    const { data: allProfiles } = await supabase
+      .from('profiles')
+      .select('id, full_name, email')
+      .order('full_name')
+
+    for (const p of (allProfiles || [])) {
+      memberMap.set(p.email, {
+        name: p.full_name || p.email,
+        email: p.email,
         projects: [],
       })
     }
-    memberMap.get(key)!.projects.push({
-      id: pm.project.id,
-      name: pm.project.name,
-      status: pm.project.status,
-      progress: pm.project.progress || 0,
-    })
-  }
 
-  // También contar proyectos donde son owner
-  for (const project of (projects || [])) {
-    // Buscar el owner en profiles
-    const { data: ownerProfile } = await supabase
-      .from('profiles')
-      .select('full_name, email')
-      .eq('id', project.owner_id)
-      .single()
-
-    if (ownerProfile) {
-      const key = ownerProfile.email
-      if (!memberMap.has(key)) {
-        memberMap.set(key, {
-          name: ownerProfile.full_name || ownerProfile.email,
-          email: ownerProfile.email,
-          projects: [],
-        })
-      }
-      const member = memberMap.get(key)!
-      // Evitar duplicados
-      if (!member.projects.find(p => p.id === project.id)) {
-        member.projects.push({
-          id: project.id,
-          name: project.name,
-          status: project.status,
-          progress: project.progress || 0,
+    // Agregar proyectos desde project_members (evitar duplicados)
+    const seen = new Set<string>()
+    for (const pm of (projectMembers || [])) {
+      if (!pm.profile || !pm.project) continue
+      const key = `${pm.profile.email}-${pm.project.id}`
+      if (seen.has(key)) continue
+      seen.add(key)
+      const entry = memberMap.get(pm.profile.email)
+      if (entry) {
+        entry.projects.push({
+          id: pm.project.id,
+          name: pm.project.name,
+          status: pm.project.status,
+          progress: pm.project.progress || 0,
         })
       }
     }
