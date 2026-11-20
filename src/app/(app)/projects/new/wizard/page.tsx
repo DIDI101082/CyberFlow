@@ -49,11 +49,21 @@ const durations = [
   'Más de 6 meses',
 ]
 
+interface TeamMember {
+  id: string
+  full_name: string
+  email: string
+  role: string
+}
+
 export default function NewProjectWizard() {
   const router = useRouter()
   const supabase = createClient()
   const [currentStep, setCurrentStep] = useState(1)
   const [areas, setAreas] = useState<Area[]>([])
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
+  const [currentUserId, setCurrentUserId] = useState<string>('')
+  const [selectedOwnerId, setSelectedOwnerId] = useState<string>('')
   const [loading, setLoading] = useState(false)
   const [generating, setGenerating] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -75,6 +85,20 @@ export default function NewProjectWizard() {
   useEffect(() => {
     supabase.from('areas').select('*').then(({ data }) => {
       if (data) setAreas(data)
+    })
+    // Cargar miembros del equipo y usuario actual
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        setCurrentUserId(user.id)
+        setSelectedOwnerId(user.id) // por defecto el admin es el responsable
+        supabase
+          .from('profiles')
+          .select('id, full_name, email, role')
+          .order('full_name')
+          .then(({ data }) => {
+            if (data) setTeamMembers(data as TeamMember[])
+          })
+      }
     })
   }, [])
 
@@ -113,14 +137,15 @@ export default function NewProjectWizard() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('No autenticado')
 
-      // 1. Crear proyecto
+      // 1. Crear proyecto — usar el responsable seleccionado como owner
+      const ownerId = selectedOwnerId || user.id
       const { data: project, error: projectError } = await supabase
         .from('projects')
         .insert({
           name: form.name,
           description: form.description,
           area_id: form.area_id || null,
-          owner_id: user.id,
+          owner_id: ownerId,
           status: 'planning',
           priority: form.priority,
           is_cross_area: false,
@@ -132,12 +157,20 @@ export default function NewProjectWizard() {
 
       if (projectError) throw projectError
 
-      // 2. Agregar owner como miembro
-      await supabase.from('project_members').insert({
-        project_id: project.id,
-        user_id: user.id,
-        role: 'lead',
-      })
+      // 2. Agregar el responsable como lead del proyecto
+      const membersToInsert = [
+        { project_id: project.id, user_id: ownerId, role: 'lead' },
+      ]
+      // Si el admin creó el proyecto para otra persona, agregarlo también como lead
+      // para que pueda ver y gestionar el proyecto desde su panel
+      if (ownerId !== user.id) {
+        membersToInsert.push({
+          project_id: project.id,
+          user_id: user.id,
+          role: 'lead',
+        })
+      }
+      await supabase.from('project_members').insert(membersToInsert)
 
       // 3. Crear milestones y tareas del plan IA
       if (aiPlan) {
@@ -338,6 +371,28 @@ export default function NewProjectWizard() {
                 </button>
               ))}
             </div>
+          </div>
+
+          <div>
+            <label className="label">Responsable del proyecto *</label>
+            <select
+              className="input"
+              value={selectedOwnerId}
+              onChange={(e) => setSelectedOwnerId(e.target.value)}
+            >
+              <option value="">Seleccioná un responsable</option>
+              {teamMembers.map((member) => (
+                <option key={member.id} value={member.id}>
+                  {member.full_name}
+                  {member.id === currentUserId ? ' (vos)' : ''}
+                  {' — '}
+                  {member.email}
+                </option>
+              ))}
+            </select>
+            <p className="mt-1 text-xs text-surface-400">
+              Esta persona será la responsable de ejecutar el proyecto y lo verá en su panel.
+            </p>
           </div>
         </div>
       )}
