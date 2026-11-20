@@ -41,6 +41,8 @@ export default function NewProjectManual() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [selectedMembers, setSelectedMembers] = useState<string[]>([])
+  const [selectedOwnerId, setSelectedOwnerId] = useState<string>('')
+  const [currentUserId, setCurrentUserId] = useState<string>('')
 
   const [form, setForm] = useState({
     name: '',
@@ -60,6 +62,10 @@ export default function NewProjectManual() {
       // Esperar sesión activa antes de hacer queries
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) return
+
+      // Guardar el id del usuario actual y usarlo como responsable por defecto
+      setCurrentUserId(session.user.id)
+      setSelectedOwnerId(session.user.id)
 
       const [areasRes, membersRes] = await Promise.all([
         supabase.from('areas').select('*'),
@@ -93,13 +99,16 @@ export default function NewProjectManual() {
         ? form.tags.split(',').map((t) => t.trim()).filter(Boolean)
         : form.category ? [form.category] : []
 
+      // Usar el responsable seleccionado como owner
+      const ownerId = selectedOwnerId || user.id
+
       const { data: project, error: projectError } = await supabase
         .from('projects')
         .insert({
           name: form.name,
           description: form.description || null,
           area_id: form.area_id || null,
-          owner_id: user.id,
+          owner_id: ownerId,
           status: form.status,
           priority: form.priority,
           start_date: form.start_date || null,
@@ -113,17 +122,21 @@ export default function NewProjectManual() {
 
       if (projectError) throw projectError
 
-      // Agregar owner como lead
-      await supabase.from('project_members').insert({
-        project_id: project.id,
-        user_id: user.id,
-        role: 'lead',
-      })
+      // Agregar el responsable como lead
+      const leadInserts: { project_id: string; user_id: string; role: string }[] = [
+        { project_id: project.id, user_id: ownerId, role: 'lead' },
+      ]
+      // Si el admin asignó el proyecto a otra persona, agregarse también como lead
+      if (ownerId !== user.id) {
+        leadInserts.push({ project_id: project.id, user_id: user.id, role: 'lead' })
+      }
+      await supabase.from('project_members').insert(leadInserts)
 
-      // Agregar miembros seleccionados
+      // Agregar miembros seleccionados (excluyendo al owner y al admin que ya están)
       if (selectedMembers.length > 0) {
+        const alreadyAdded = new Set([ownerId, user.id])
         const memberInserts = selectedMembers
-          .filter((id) => id !== user.id) // no duplicar el owner
+          .filter((id) => !alreadyAdded.has(id))
           .map((memberId) => ({
             project_id: project.id,
             user_id: memberId,
@@ -230,6 +243,27 @@ export default function NewProjectManual() {
               </select>
             </div>
           </div>
+
+          <div>
+            <label className="label">Responsable del proyecto *</label>
+            <select
+              className="input"
+              value={selectedOwnerId}
+              onChange={(e) => setSelectedOwnerId(e.target.value)}
+            >
+              <option value="">Seleccioná un responsable</option>
+              {members.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.full_name || m.email}
+                  {m.id === currentUserId ? ' (vos)' : ''}
+                  {' — '}{m.email}
+                </option>
+              ))}
+            </select>
+            <p className="mt-1 text-xs text-surface-400">
+              Esta persona será la responsable de ejecutar el proyecto y lo verá en su panel.
+            </p>
+          </div>
         </div>
 
         {/* Estado y prioridad */}
@@ -332,7 +366,7 @@ export default function NewProjectManual() {
             <Users className="w-5 h-5 text-surface-400" />
             Asignar Miembros
           </h2>
-          <p className="text-sm text-surface-500 -mt-2">Seleccioná las personas que van a trabajar en este proyecto (vos ya quedás como líder)</p>
+          <p className="text-sm text-surface-500 -mt-2">Seleccioná las personas del equipo que van a colaborar (el responsable y vos ya quedan como líderes)</p>
 
           {/* Miembros seleccionados */}
           {selectedMembers.length > 0 && (
