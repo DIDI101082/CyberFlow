@@ -20,18 +20,36 @@ export default async function DashboardPage() {
   if (!user) return null
 
   const [
-    { data: projects },
     { data: allTasks },
     { data: recentActivity },
     { data: profile },
     { data: projectMembers },
+    { data: myMemberships },
+    { data: ownedProjects },
   ] = await Promise.all([
-    supabase.from('projects').select('*').order('updated_at', { ascending: false }),
     supabase.from('tasks').select('*, project:projects(name)'),
     supabase.from('activity_log').select('*, project:projects(name)').order('created_at', { ascending: false }).limit(10),
     supabase.from('profiles').select('full_name, role').eq('id', user.id).single(),
     supabase.from('project_members').select('*, profile:profiles(full_name, email), project:projects(id, name, status, progress)'),
+    supabase.from('project_members').select('project_id').eq('user_id', user.id),
+    supabase.from('projects').select('id').eq('owner_id', user.id),
   ])
+
+  // Admin y area_lead ven todos los proyectos; el resto solo los suyos
+  const isAdmin = profile?.role === 'admin' || profile?.role === 'area_lead'
+  let projects: any[] = []
+  if (isAdmin) {
+    const { data } = await supabase.from('projects').select('*').order('updated_at', { ascending: false })
+    projects = data || []
+  } else {
+    const memberIds = (myMemberships || []).map((m: any) => m.project_id)
+    const ownerIds = (ownedProjects || []).map((p: any) => p.id)
+    const allIds = [...new Set([...memberIds, ...ownerIds])]
+    if (allIds.length > 0) {
+      const { data } = await supabase.from('projects').select('*').in('id', allIds).order('updated_at', { ascending: false })
+      projects = data || []
+    }
+  }
 
   const activeProjects = projects?.filter((p) => p.status === 'in_progress' || p.status === 'planning') || []
   const completedProjects = projects?.filter((p) => p.status === 'completed') || []
