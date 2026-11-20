@@ -33,7 +33,7 @@ export default async function DashboardPage() {
     supabase.from('project_members').select('*, profile:profiles(full_name, email), project:projects(id, name, status, progress)'),
   ])
 
-  const activeProjects = projects?.filter((p) => p.status === 'active') || []
+  const activeProjects = projects?.filter((p) => p.status === 'in_progress' || p.status === 'planning') || []
   const completedProjects = projects?.filter((p) => p.status === 'completed') || []
   const overdueTasks = allTasks?.filter(
     (t) => t.due_date && new Date(t.due_date) < new Date() && t.status !== 'completed'
