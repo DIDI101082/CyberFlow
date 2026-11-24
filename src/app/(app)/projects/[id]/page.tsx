@@ -32,6 +32,7 @@ import GenerateReportButton from '@/components/project/GenerateReportButton'
 import TaskList from '@/components/project/TaskList'
 import AISuggestions from '@/components/projects/AISuggestions'
 import ProjectMembers from '@/components/project/ProjectMembers'
+import DeleteProjectButton from '@/components/project/DeleteProjectButton'
 
 export default async function ProjectDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -93,7 +94,10 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
             <p className="text-surface-500">{project.description || 'Sin descripción'}</p>
           </div>
 
-          <GenerateReportButton projectId={project.id} />
+          <div className="flex items-center gap-2">
+            <GenerateReportButton projectId={project.id} />
+            <DeleteProjectButton projectId={project.id} projectName={project.name} />
+          </div>
         </div>
       </div>
 
