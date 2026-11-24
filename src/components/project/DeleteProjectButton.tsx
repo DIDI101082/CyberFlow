@@ -16,7 +16,7 @@ export default function DeleteProjectButton({ projectId, projectName }: DeletePr
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const canConfirm = confirmText === projectName
+  const canConfirm = confirmText.trim() === projectName.trim()
 
   async function handleDelete() {
     if (!canConfirm) return
